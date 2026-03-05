@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>机器人路径规划算法教学系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', sans-serif; background: linear-gradient(135deg, #1a1a2e, #16213e); min-height: 100vh; color: #eee; padding: 15px; }
+        h1 { text-align: center; color: #00d4ff; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 15px; }
+        .container { display: flex; gap: 15px; max-width: 1500px; margin: 0 auto; flex-wrap: wrap; justify-content: center; }
+        .panel { background: #1e1e2e; border-radius: 10px; padding: 15px; }
+        .panel-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; border-bottom: 2px solid #667eea; padding-bottom: 8px; }
+        .left { width: 280px; }
+        .mid { flex: 1; min-width: 450px; }
+        .right { width: 350px; }
+        
+        .algo-btn { width: 100%; padding: 12px; margin-bottom: 8px; border: none; border-radius: 6px; cursor: pointer; text-align: left; font-size: 13px; color: white; }
+        .algo-btn:hover { transform: translateX(5px); }
+        .algo-btn.active { border: 3px solid #00d4ff; }
+        .btn-dijkstra { background: #e91e63; }
+        .btn-astar { background: #ff9800; }
+        
+        .edit-tools { display: flex; gap: 5px; margin-bottom: 12px; flex-wrap: wrap; }
+        .edit-btn { flex: 1; min-width: 60px; padding: 8px; border: none; border-radius: 5px; cursor: pointer; background: #333; color: #aaa; font-size: 12px; }
+        .edit-btn.active { background: #667eea; color: white; }
+        
+        .control-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .btn { padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; }
+        .btn-run { background: #4CAF50; }
+        .btn-reset { background: #f44336; }
+        
+        .speed-control { margin-bottom: 12px; }
+        .speed-control label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; }
+        
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .stat { background: #2a2a3e; padding: 10px; border-radius: 6px; text-align: center; }
+        .stat-label { font-size: 11px; color: #888; }
+        .stat-value { font-size: 20px; color: #00d4ff; font-weight: bold; }
+        
+        .result { margin-top: 12px; padding: 12px; border-radius: 6px; text-align: center; display: none; font-weight: bold; }
+        .result.show { display: block; }
+        .result.success { background: rgba(76,175,80,0.4); color: #4CAF50; }
+        
+        #maze { display: grid; grid-template-columns: repeat(20, 25px); grid-template-rows: repeat(15, 25px); gap: 1px; background: #333; border: 3px solid #00d4ff; margin: 0 auto; }
+        .cell { width: 25px; height: 25px; background: #222; cursor: pointer; }
+        .cell.wall { background: #555; }
+        .cell.start { background: #4CAF50 !important; border-radius: 50%; }
+        .cell.end { background: #f44336 !important; }
+        .cell.path { background: #00d4ff; }
+        .cell.visited { background: #3a3a5c; }
+        .cell.searching { background: #ff9800; }
+        
+        .legend { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; justify-content: center; font-size: 12px; }
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .legend-color { width: 14px; height: 14px; border-radius: 3px; }
+        
+        .tabs { display: flex; gap: 5px; margin-bottom: 10px; }
+        .tab { flex: 1; padding: 8px; background: #333; border: none; border-radius: 5px; color: #aaa; cursor: pointer; }
+        .tab.active { background: #667eea; color: white; }
+        
+        .tab-content { display: none; height: 380px; overflow-y: auto; font-size: 12px; line-height: 1.6; }
+        .tab-content.active { display: block; }
+        .tab-content h3 { color: #00d4ff; margin: 12px 0 8px; font-size: 14px; }
+        .tab-content p { margin-bottom: 8px; }
+        .highlight { background: #333; padding: 2px 6px; border-radius: 3px; color: #ff9800; }
+        
+        .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .pros, .cons { padding: 8px; border-radius: 5px; font-size: 11px; }
+        .pros { background: rgba(76,175,80,0.2); border: 1px solid #4CAF50; }
+        .cons { background: rgba(244,67,54,0.2); border: 1px solid #f44336; }
+        
+        pre { background: #0d0d0d; padding: 10px; border-radius: 5px; font-size: 10px; line-height: 1.4; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; }
+        .code-keyword { color: #569cd6; }
+        .code-comment { color: #6a9955; }
+    </style>
+</head>
+<body>
+    <h1>🤖 机器人路径规划算法教学系统</h1>
+    <p class="subtitle">可视化演示 + 原理讲解 + 代码分析</p>
+    
+    <div class="container">
+        <div class="panel left">
+            <div class="panel-title">算法选择</div>
+            <button class="algo-btn btn-dijkstra active" onclick="selectAlgo('dijkstra')"><strong>Dijkstra</strong> 最短路径</button>
+            <button class="algo-btn btn-astar" onclick="selectAlgo('astar')"><strong>A*</strong> 启发式搜索</button>
+            
+            <div class="panel-title" style="margin-top:15px;">编辑地图</div>
+            <div class="edit-tools">
+                <button class="edit-btn active" onclick="setEdit('wall')">画墙</button>
+                <button class="edit-btn" onclick="setEdit('start')">起点</button>
+                <button class="edit-btn" onclick="setEdit('end')">终点</button>
+                <button class="edit-btn" onclick="setEdit('erase')">擦除</button>
+            </div>
+            
+            <div class="control-btns">
+                <button class="btn btn-run" onclick="runAI()">▶ 运行算法</button>
+                <button class="btn btn-reset" onclick="resetMaze()">🔄 重置</button>
+            </div>
+            
+            <div class="speed-control">
+                <label>速度: <span id="speedVal">中</span></label>
+                <input type="range" id="speedSlider" min="1" max="100" value="50" oninput="updateSpeed()">
+            </div>
+            
+            <div class="stats">
+                <div class="stat"><div class="stat-label">访问节点</div><div class="stat-value" id="visitedCount">0</div></div>
+                <div class="stat"><div class="stat-label">路径长度</div><div class="stat-value" id="pathLength">0</div></div>
+            </div>
+            
+            <div class="result" id="result"></div>
+        </div>
+        
+        <div class="panel mid">
+            <div class="panel-title" style="text-align:center">机器人路径可视化</div>
+            <div id="maze"></div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color" style="background:#4CAF50;border-radius:50%"></div>起点</div>
+                <div class="legend-item"><div class="legend-color" style="background:#f44336"></div>终点</div>
+                <div class="legend-item"><div class="legend-color" style="background:#555"></div>障碍物</div>
+                <div class="legend-item"><div class="legend-color" style="background:#ff9800"></div>搜索中</div>
+                <div class="legend-item"><div class="legend-color" style="background:#3a3a5c"></div>已访问</div>
+                <div class="legend-item"><div class="legend-color" style="background:#00d4ff"></div>最终路径</div>
+            </div>
+        </div>
+        
+        <div class="panel right">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('原理')">原理</button>
+                <button class="tab" onclick="showTab('代码')">代码</button>
+            </div>
+            <div id="原理" class="tab-content active"></div>
+            <div id="代码" class="tab-content"><pre id="codeDisplay"></pre></div>
+        </div>
+    </div>
+
+    <script>
+        const ROWS = 15, COLS = 20;
+        let maze = [];
+        let startPos = {r: 2, c: 2};
+        let endPos = {r: 12, c: 17};
+        let currentAlgo = 'dijkstra';
+        let editMode = 'wall';
+        let isRunning = false;
+        
+        const algoInfo = {
+            dijkstra: {
+                name: 'Dijkstra 算法',
+                principle: '<h3>Dijkstra - 最短路径算法</h3><p>1956年由计算机科学家Edsger Dijkstra提出，是最经典的单源最短路径算法。</p><h3>核心思想</h3><p>从起点开始，<span class="highlight">始终优先处理距离最短的节点</span>，逐步扩展到所有可达节点，直到找到终点。</p><h3>算法步骤</h3><ol style="margin-left:20px;"><li>将起点距离设为0，其他节点设为无穷大</li><li>取出距离最小的未访问节点</li><li>更新其邻居节点的距离</li><li>重复直到到达终点</li></ol><h3>应用场景</h3><p>GPS导航、网络路由、游戏AI、机器人导航</p><div class="pros-cons"><div class="pros"><h4>优点</h4><ul><li>保证最优解</li><li>理论成熟</li></ul></div><div class="cons"><h4>缺点</h4><ul><li>需要遍历大量节点</li><li>无方向性</li></ul></div></div>',
+                code:'<span class="code-keyword">import</span> heapq\n\n<span class="code-keyword">def</span> dijkstra(grid, start, end):\n    pq = [(0, start)]\n    dist = {start: 0}\n    parent = {}\n    \n    <span class="code-keyword">while</span> pq:\n        d, (r, c) = heapq.heappop(pq)\n        \n        <span class="code-keyword">if</span> (r, c) == end:\n            <span class="code-keyword">return</span> reconstruct(parent, end)\n        \n        <span class="code-keyword">for</span> dr, dc <span class="code-keyword">in</span> dirs:\n            nr, nc = r+dr, c+dc\n            <span class="code-keyword">if</span> valid(nr, nc):\n                new_d = d + 1\n                <span class="code-keyword">if</span> new_d < dist.get((nr,nc), <span class="code-keyword">float</span>(\'inf\')):\n                    dist[(nr,nc)] = new_d\n                    parent[(nr,nc)] = (r,c)\n                    heapq.heappush(pq, (new_d, (nr,nc)))\n    \n    <span class="code-keyword">return</span> <span class="code-keyword">None</span>'
+            },
+            astar: {
+                name: 'A* 算法',
+                principle: '<h3>A* - 启发式搜索算法</h3><p>1968年提出，是Dijkstra的改进版，加入了<span class="highlight">启发函数</span>引导搜索方向。</p><h3>核心公式</h3><p>f(n) = g(n) + h(n)</p><ul><li><span class="highlight">g(n)</span>: 起点到当前节点的实际距离</li><li><span class="highlight">h(n)</span>: 当前到终点的估算距离</li><li><span class="highlight">f(n)</span>: 总估价成本</li></ul><h3>与Dijkstra的区别</h3><p>Dijkstra只考虑已走距离，A*同时考虑<span class="highlight">"还要走多远"</span>，像GPS导航一样智能。</p><div class="pros-cons"><div class="pros"><h4>优点</h4><ul><li>效率高</li><li>保证最优解</li></ul></div><div class="cons"><h4>缺点</h4><ul><li>需要设计启发函数</li><li>内存消耗较大</li></ul></div></div>',
+                code:'<span class="code-keyword">import</span> heapq\n\n<span class="code-keyword">def</span> heuristic(a, b):\n    <span class="code-comment"># 曼哈顿距离</span>\n    <span class="code-keyword">return</span> abs(a[0]-b[0]) + abs(a[1]-b[1])\n\n<span class="code-keyword">def</span> astar(grid, start, end):\n    pq = [(0, start)]\n    g_score = {start: 0}\n    parent = {}\n    \n    <span class="code-keyword">while</span> pq:\n        f, (r,c) = heapq.heappop(pq)\n        \n        <span class="code-keyword">if</span> (r,c) == end:\n            <span class="code-keyword">return</span> reconstruct(parent, end)\n        \n        <span class="code-keyword">for</span> dr,dc <span class="code-keyword">in</span> dirs:\n            nr,nc = r+dr, c+dc\n            <span class="code-keyword">if</span> valid(nr,nc):\n                g = g_score[(r,c)] + 1\n                <span class="code-keyword">if</span> g < g_score.get((nr,nc), <span class="code-keyword">float</span>(\'inf\')):\n                    g_score[(nr,nc)] = g\n                    f = g + heuristic((nr,nc), end)\n                    parent[(nr,nc)] = (r,c)\n                    heapq.heappush(pq, (f, (nr,nc)))\n    \n    <span class="code-keyword">return</span> <span class="code-keyword">None</span>'
+            }
+        };
+        
+        function init() {
+            maze = [];
+            for (let r = 0; r < ROWS; r++) {
+                maze[r] = [];
+                for (let c = 0; c < COLS; c++) maze[r][c] = 0;
+            }
+            render();
+            updateInfo();
+        }
+        
+        function render() {
+            const el = document.getElementById('maze');
+            el.innerHTML = '';
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    let div = document.createElement('div');
+                    div.className = 'cell';
+                    div.dataset.r = r;
+                    div.dataset.c = c;
+                    if (r === startPos.r && c === startPos.c) div.classList.add('start');
+                    else if (r === endPos.r && c === endPos.c) div.classList.add('end');
+                    else if (maze[r][c] === 1) div.classList.add('wall');
+                    div.onclick = () => handleClick(r,c);
+                    el.appendChild(div);
+                }
+            }
+        }
+        
+        function handleClick(r,c) {
+            if (isRunning) return;
+            if (editMode === 'wall') { if (!isSE(r,c)) maze[r][c] = maze[r][c]?0:1; }
+            else if (editMode === 'start') { if (maze[r][c]!==1) startPos={r,c}; }
+            else if (editMode === 'end') { if (maze[r][c]!==1) endPos={r,c}; }
+            else if (editMode === 'erase') maze[r][c]=0;
+            render();
+        }
+        
+        function isSE(r,c) { return (r===startPos.r&&c===startPos.c)||(r===endPos.r&&c===endPos.c); }
+        
+        function selectAlgo(algo) {
+            currentAlgo = algo;
+            document.querySelectorAll('.algo-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.algo-btn.btn-'+algo).classList.add('active');
+            updateInfo();
+        }
+        
+        function setEdit(mode) {
+            editMode = mode;
+            document.querySelectorAll('.edit-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        
+        function updateInfo() {
+            document.getElementById('原理').innerHTML = algoInfo[currentAlgo].principle;
+            document.getElementById('codeDisplay').innerHTML = algoInfo[currentAlgo].code;
+        }
+        
+        function showTab(tab) {
+            document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tab).classList.add('active');
+        }
+        
+        function updateSpeed() {
+            let v = document.getElementById('speedSlider').value;
+            document.getElementById('speedVal').textContent = ['很慢','慢','中','快','很快'][Math.floor((v-1)/20)];
+        }
+        function getSpeed() { return Math.max(5, 150 - document.getElementById('speedSlider').value * 1.5); }
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+        
+        function resetMaze() {
+            if (isRunning) return;
+            init(); startPos={r:2,c:2}; endPos={r:12,c:17};
+            document.getElementById('visitedCount').textContent='0';
+            document.getElementById('pathLength').textContent='0';
+            document.getElementById('result').className='result';
+        }
+        
+        function clearVis() {
+            document.querySelectorAll('.cell').forEach(c => {
+                c.classList.remove('searching','visited','path');
+                let r=parseInt(c.dataset.r), cc=parseInt(c.dataset.c);
+                if (r===startPos.r&&cc===startPos.c) c.classList.add('start');
+                else if (r===endPos.r&&cc===endPos.c) c.classList.add('end');
+                else if (maze[r][cc]===1) c.classList.add('wall');
+            });
+        }
+        
+        async function runAI() {
+            if (isRunning) return;
+            isRunning = true;
+            document.getElementById('result').className='result';
+            clearVis();
+            let visitedCount = 0, path = [];
+            if (currentAlgo==='dijkstra') path = await dijkstra(visitedCount);
+            else path = await astar(visitedCount);
+            document.getElementById('visitedCount').textContent = visitedCount;
+            if (path && path.length > 0) {
+                let cells = document.querySelectorAll('.cell');
+                for (let i=0; i<path.length; i++) {
+                    let [r,c] = path[i];
+                    cells[r*COLS+c].classList.remove('searching','visited');
+                    cells[r*COLS+c].classList.add('path');
+                    await sleep(30);
+                }
+                document.getElementById('pathLength').textContent = path.length-1;
+                document.getElementById('result').className = 'result show success';
+                document.getElementById('result').textContent = '找到路径！长度: ' + (path.length-1);
+            } else {
+                document.getElementById('result').className = 'result show';
+                document.getElementById('result').textContent = '无法到达！';
+            }
+            isRunning = false;
+        }
+        
+        function dirs() { return [[0,1],[1,0],[0,-1],[-1,0]]; }
+        function heuristic(r,c) { return Math.abs(r-endPos.r) + Math.abs(c-endPos.c); }
+        
+        async function dijkstra(visitedCount) {
+            let pq = [[0,startPos.r,startPos.c,[]]];
+            let visited = new Set();
+            let dist = {}, parent = {};
+            let cells = document.querySelectorAll('.cell');
+            
+            while (pq.length > 0) {
+                pq.sort((a,b) => a[0]-b[0]);
+                let [d,r,c,path] = pq.shift();
+                let key = r+','+c;
+                if (visited.has(key)) continue;
+                visited.add(key);
+                visitedCount++; document.getElementById('visitedCount').textContent = visitedCount;
+                
+                if (r===endPos.r && c===endPos.c) return reconstructPath(parent,r,c);
+                
+                let idx = r*COLS+c;
+                if (!isSE(r,c)) cells[idx].classList.add('searching');
+                await sleep(getSpeed());
+                if (!isSE(r,c)) { cells[idx].classList.remove('searching'); cells[idx].classList.add('visited'); }
+                
+                for (let [dr,dc] of dirs()) {
+                    let nr=r+dr, nc=c+dc, nkey=nr+','+nc;
+                    if (nr>=0&&nr<ROWS&&nc>=0&&nc<COLS && maze[nr][nc]!==1 && !visited.has(nkey)) {
+                        let nd = d+1;
+                        if (nd < (dist[nkey]||Infinity)) {
+                            dist[nkey] = nd;
+                            parent[nkey] = [r,c];
+                            pq.push([nd,nr,nc,path.concat([[r,c]])]);
+                        }
+                    }
+                }
+            }
+            return [];
+        }
+        
+        async function astar(visitedCount) {
+            let pq = [[heuristic(startPos.r,startPos.c), 0,startPos.r,startPos.c,[]]];
+            let closed = new Set();
+            let gScore = {}, parent = {};
+            let cells = document.querySelectorAll('.cell');
+            
+            while (pq.length > 0) {
+                pq.sort((a,b) => a[0]-b[0]);
+                let [f,g,r,c,path] = pq.shift();
+                let key = r+','+c;
+                if (closed.has(key)) continue;
+                closed.add(key);
+                visitedCount++; document.getElementById('visitedCount').textContent = visitedCount;
+                
+                if (r===endPos.r && c===endPos.c) return reconstructPath(parent,r,c);
+                
+                let idx = r*COLS+c;
+                if (!isSE(r,c)) cells[idx].classList.add('searching');
+                await sleep(getSpeed());
+                if (!isSE(r,c)) { cells[idx].classList.remove('searching'); cells[idx].classList.add('visited'); }
+                
+                for (let [dr,dc] of dirs()) {
+                    let nr=r+dr, nc=c+dc, nkey=nr+','+nc;
+                    if (nr>=0&&nr<ROWS&&nc>=0&&nc<COLS && maze[nr][nc]!==1 && !closed.has(nkey)) {
+                        let ng = g+1;
+                        if (ng < (gScore[nkey]||Infinity)) {
+                            gScore[nkey] = ng;
+                            let nf = ng + heuristic(nr,nc);
+                            parent[nkey] = [r,c];
+                            pq.push([nf,ng,nr,nc,path.concat([[r,c]])]);
+                        }
+                    }
+                }
+            }
+            return [];
+        }
+        
+        function reconstructPath(parent, endR, endC) {
+            let path = [], key = endR+','+endC;
+            while (key) {
+                let [r,c] = key.split(',').map(Number);
+                path.unshift([r,c]);
+                key = parent[key] ? parent[key][0]+','+parent[key][1] : null;
+            }
+            return path;
+        }
+        
+        init();
+    </script>
+</body>
+</html>
