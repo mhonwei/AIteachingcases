@@ -1,274 +1,316 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI算法可视化教学系统</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}body{font-family:'Microsoft YaHei',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);min-height:100vh;color:#eee;padding:15px}h1{text-align:center;color:#00d4ff;margin-bottom:5px}.subtitle{text-align:center;color:#888;margin-bottom:15px}.container{display:flex;gap:15px;max-width:1600px;margin:0 auto;flex-wrap:wrap;justify-content:center}.panel{background:#1e1e2e;border-radius:10px;padding:15px}.panel-title{font-size:16px;font-weight:bold;margin-bottom:12px;border-bottom:2px solid #667eea;padding-bottom:8px}.left{width:300px}.mid{flex:1;min-width:500px}.right{width:380px}.case-selector{display:flex;gap:10px;margin-bottom:15px}.case-btn{flex:1;padding:12px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:bold;color:#fff;background:#333}.case-btn.active{border:3px solid #00d4ff}.algo-btn{width:100%;padding:12px;margin-bottom:8px;border:none;border-radius:6px;cursor:pointer;text-align:left;font-size:13px;color:#fff}.algo-btn.active{border:3px solid #00d4ff}.btn-bfs{background:#e91e63}.btn-dfs{background:#9c27b0}.btn-astar{background:#ff9800}.btn-dijkstra{background:#4CAF50}.edit-tools{display:flex;gap:5px;margin-bottom:12px}.edit-btn{flex:1;padding:8px;border:none;border-radius:5px;cursor:pointer;background:#333;color:#aaa;font-size:12px}.edit-btn.active{background:#667eea;color:#fff}.control-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.btn{padding:10px;border:none;border-radius:6px;cursor:pointer;font-weight:bold;color:#fff}.btn-run{background:#4CAF50}.btn-reset{background:#f44336}.speed-control{margin-bottom:12px}.speed-control label{display:block;font-size:12px;color:#aaa;margin-bottom:5px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:#2a2a3e;padding:10px;border-radius:6px;text-align:center}.stat-label{font-size:11px;color:#888}.stat-value{font-size:20px;color:#00d4ff;font-weight:bold}.result{margin-top:12px;padding:12px;border-radius:6px;text-align:center;display:none;font-weight:bold}.result.show{display:block}.result.success{background:rgba(76,175,80,0.3);color:#4CAF50}.result.fail{background:rgba(244,67,54,0.3);color:#f44336}#maze{display:grid;grid-template-columns:repeat(20,25px);grid-template-rows:repeat(15,25px);gap:1px;background:#333;border:3px solid #00d4ff;margin:0 auto}.cell{width:25px;height:25px;background:#222;cursor:pointer}.cell.wall{background:#555}.cell.start{background:#4CAF50!important;border-radius:50%}.cell.end{background:#f44336!important}.cell.path{background:#00d4ff}.cell.visited{background:#3a3a5c}.cell.searching{background:#ff9800}#searchMaze{display:grid;grid-template-columns:repeat(15,28px);grid-template-rows:repeat(12,28px);gap:1px;background:#333;border:3px solid #f5576c;margin:0 auto}.search-cell{width:28px;height:28px;background:#222;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center}.search-cell.wall{background:#555}.search-cell.start{background:#4CAF50!important;border-radius:50%;color:#fff;font-weight:bold}.search-cell.end{background:#f44336!important;color:#fff;font-weight:bold}.search-cell.path{background:#00d4ff}.search-cell.visited{background:#9c27b0}.search-cell.searching{background:#e91e63}.legend{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;justify-content:center;font-size:12px}.legend-item{display:flex;align-items:center;gap:4px}.legend-color{width:14px;height:14px;border-radius:3px}.tabs{display:flex;gap:5px;margin-bottom:10px}.tab{flex:1;padding:8px;background:#333;border:none;border-radius:5px;color:#aaa;cursor:pointer}.tab.active{background:#667eea;color:#fff}.tab-content{display:none;height:400px;overflow-y:auto;font-size:12px;line-height:1.6}.tab-content.active{display:block}.tab-content h3{color:#00d4ff;margin:12px 0 8px}.highlight{background:#333;padding:2px 6px;border-radius:3px;color:#ff9800}.pros-cons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.pros,.cons{padding:8px;border-radius:5px;font-size:11px}.pros{background:rgba(76,175,80,0.15);border:1px solid rgba(76,175,80,0.5)}.cons{background:rgba(244,67,54,0.15);border:1px solid rgba(244,67,54,0.5)}pre{background:#0d0d0d;padding:10px;border-radius:5px;font-size:10px;overflow-x:auto;white-space:pre-wrap;color:#aaa}.case-panel{display:none}.case-panel.active{display:block}
-    </style>
+<meta charset="UTF-8">
+<title>AI算法可视化教学系统</title>
+<style>
+body{font-family:Microsoft YaHei;background:#1a1a2e;color:#eee;padding:20px;margin:0}
+h1{text-align:center;color:#00d4ff}
+.container{display:flex;gap:20px;max-width:1400px;margin:0 auto;flex-wrap:wrap}
+.panel{background:#1e1e2e;border-radius:10px;padding:15px}
+.left{width:260px}
+.mid{flex:1;min-width:450px}
+.right{width:320px}
+.btn-case{width:100%;padding:15px;margin:5px 0;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:bold;color:#fff;background:#333}
+.btn-case.active{border:3px solid #00d4ff}
+.btn-algo{width:100%;padding:10px;margin:3px 0;border:none;border-radius:5px;cursor:pointer;text-align:left;color:#fff;background:#444}
+.btn-algo.active{border:2px solid #00d4ff}
+.tools{display:flex;gap:5px;margin:10px 0}
+.tool-btn{flex:1;padding:8px;border:none;border-radius:5px;cursor:pointer;background:#333;color:#aaa}
+.tool-btn.active{background:#667eea;color:#fff}
+.ctrl{display:flex;gap:10px;margin:10px 0}
+.run-btn{flex:1;padding:12px;border:none;border-radius:6px;cursor:pointer;background:#4CAF50;color:#fff;font-weight:bold}
+.rst-btn{flex:1;padding:12px;border:none;border-radius:6px;cursor:pointer;background:#f44336;color:#fff;font-weight:bold}
+.speed{margin:10px 0}
+.speed label{color:#aaa;font-size:12px}
+.stats{display:flex;gap:10px;margin:10px 0}
+.stat{flex:1;background:#2a2a3e;padding:10px;border-radius:5px;text-align:center}
+.stat-num{font-size:18px;color:#00d4ff;font-weight:bold}
+.stat-lbl{font-size:10px;color:#888}
+#grid{display:grid;gap:1px;background:#333;margin:0 auto}
+.cell{background:#222;cursor:pointer}
+.cell.wall{background:#555}
+.cell.start{background:#4CAF50;border-radius:50%}
+.cell.end{background:#f44336}
+.cell.visited{background:#9c27b0}
+.cell.searching{background:#e91e63}
+.cell.path{background:#00d4ff}
+.legend{display:flex;gap:15px;margin-top:10px;justify-content:center;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:12px}
+.box{width:12px;height:12px;border-radius:2px}
+.tabs{display:flex;gap:5px;margin-bottom:10px}
+.tab{flex:1;padding:8px;background:#333;border:none;border-radius:5px;color:#aaa;cursor:pointer}
+.tab.active{background:#667eea;color:#fff}
+.content{height:350px;overflow-y:auto;font-size:12px}
+.content h3{color:#00d4ff;margin:10px 0 5px}
+pre{background:#111;padding:10px;border-radius:5px;font-size:11px;overflow-x:auto;margin:5px 0}
+.result{padding:10px;border-radius:5px;text-align:center;margin:10px 0;display:none}
+.result.show{display:block}
+.result.ok{background:rgba(76,175,80,0.3);color:#4CAF50}
+.result.no{background:rgba(244,67,54,0.3);color:#f44336}
+</style>
 </head>
 <body>
-    <h1>AI算法可视化教学系统</h1>
-    <p class="subtitle">搜索算法 + 路径规划</p>
-    <div class="container">
-        <div class="panel left">
-            <div class="panel-title">案例选择</div>
-            <div class="case-selector">
-                <button class="case-btn search active" onclick="selectCase('search')">搜索算法</button>
-                <button class="case-btn path" onclick="selectCase('path')">路径规划</button>
-            </div>
-            <div id="searchPanel" class="case-panel active">
-                <div class="panel-title">算法选择</div>
-                <button class="algo-btn btn-bfs active" onclick="selectAlgo('bfs')"><strong>BFS</strong> 广度优先</button>
-                <button class="algo-btn btn-dfs" onclick="selectAlgo('dfs')"><strong>DFS</strong> 深度优先</button>
-                <button class="algo-btn btn-astar" onclick="selectAlgo('astar')"><strong>A*</strong> 启发式</button>
-                <div class="panel-title" style="margin-top:15px">编辑地图</div>
-                <div class="edit-tools">
-                    <button class="edit-btn active" onclick="setEdit('wall')">画墙</button>
-                    <button class="edit-btn" onclick="setEdit('start')">起点</button>
-                    <button class="edit-btn" onclick="setEdit('end')">终点</button>
-                    <button class="edit-btn" onclick="setEdit('erase')">擦除</button>
-                </div>
-            </div>
-            <div id="pathPanel" class="case-panel">
-                <div class="panel-title">算法选择</div>
-                <button class="algo-btn btn-dijkstra active" onclick="selectAlgo('dijkstra')"><strong>Dijkstra</strong> 最短路径</button>
-                <button class="algo-btn btn-astar" onclick="selectAlgo('astar2')"><strong>A*</strong> 启发式</button>
-                <div class="panel-title" style="margin-top:15px">编辑地图</div>
-                <div class="edit-tools">
-                    <button class="edit-btn active" onclick="setEdit('wall')">画墙</button>
-                    <button class="edit-btn" onclick="setEdit('start')">起点</button>
-                    <button class="edit-btn" onclick="setEdit('end')">终点</button>
-                    <button class="edit-btn" onclick="setEdit('erase')">擦除</button>
-                </div>
-            </div>
-            <div class="control-btns">
-                <button class="btn btn-run" onclick="runAI()">运行算法</button>
-                <button class="btn btn-reset" onclick="resetMaze()">重置</button>
-            </div>
-            <div class="speed-control">
-                <label>速度: <span id="speedVal">中</span></label>
-                <input type="range" id="speedSlider" min="1" max="100" value="50" oninput="updateSpeed()">
-            </div>
-            <div class="stats">
-                <div class="stat"><div class="stat-label">访问节点</div><div class="stat-value" id="visitedCount">0</div></div>
-                <div class="stat"><div class="stat-label">路径长度</div><div class="stat-value" id="pathLength">0</div></div>
-                <div class="stat"><div class="stat-label">运行时间</div><div class="stat-value" id="runTime">0ms</div></div>
-            </div>
-            <div class="result" id="result"></div>
-        </div>
-        <div class="panel mid">
-            <div class="panel-title" style="text-align:center" id="vizTitle">搜索算法可视化</div>
-            <div id="searchMaze" class="case-panel active"></div>
-            <div id="maze" class="case-panel"></div>
-            <div class="legend">
-                <div class="legend-item"><div class="legend-color" style="background:#4CAF50;border-radius:50%"></div>起点</div>
-                <div class="legend-item"><div class="legend-color" style="background:#f44336"></div>终点</div>
-                <div class="legend-item"><div class="legend-color" style="background:#555"></div>障碍物</div>
-                <div class="legend-item"><div class="legend-color" style="background:#e91e63"></div>搜索中</div>
-                <div class="legend-item"><div class="legend-color" style="background:#9c27b0"></div>已访问</div>
-                <div class="legend-item"><div class="legend-color" style="background:#00d4ff"></div>路径</div>
-            </div>
-        </div>
-        <div class="panel right">
-            <div class="tabs">
-                <button class="tab active" onclick="showTab('原理')">原理</button>
-                <button class="tab" onclick="showTab('代码')">代码</button>
-            </div>
-            <div id="原理" class="tab-content active"></div>
-            <div id="代码" class="tab-content"><pre id="codeDisplay"></pre></div>
-        </div>
-    </div>
-    <script>
-const SEARCH_ROWS=12,SEARCH_COLS=15;
-const PATH_ROWS=15,PATH_COLS=20;
-let currentCase='search';
-let currentSearchAlgo='bfs';
-let currentPathAlgo='dijkstra';
-let editMode='wall';
-let isRunning=false;
-let searchMaze=[],searchStart={r:2,c:2},searchEnd={r:9,c:12};
-let pathMaze=[],pathStart={r:2,c:2},pathEnd={r:12,c:17};
-const algoInfo={
-    bfs:{name:'BFS',principle:'<h3>BFS 广度优先搜索</h3><p>从起点开始，像水面波纹一样层层扩散搜索。</p><h3>特点</h3><ul><li>队列实现(FIFO)</li><li>保证最短路径</li></ul><div class="pros-cons"><div class="pros"><h4>优点</h4><ul><li>保证最短</li><li>实现简单</li></ul></div><div class="cons"><h4>缺点</h4><ul><li>内存消耗大</li></ul></div></div>',code:'from collections import deque\n\ndef bfs(grid,start,end):\n    queue=deque([start])\n    visited={start}\n    parent={}\n    while queue:\n        r,c=queue.popleft()\n        if (r,c)==end:return reconstruct(parent,end)\n        for dr,dc in dirs:\n            nr,nc=r+dr,c+dc\n            if valid(nr,nc) and (nr,nc) not in visited:\n                visited.add((nr,nc))\n                parent[(nr,nc)]=(r,c)\n                queue.append((nr,nc))\n    return None'},
-    dfs:{name:'DFS',principle:'<h3>DFS 深度优先搜索</h3><p>沿着一条路走到黑，不行再回溯。</p><h3>特点</h3><ul><li>栈实现</li><li>不保证最短</li></ul><div class="pros-cons"><div class="pros"><h4>优点</h4><ul><li>空间效率高</li></ul></div><div class="cons"><h4>缺点</h4><ul><li>不保证最短</li></ul></div></div>',code:'def dfs(grid,start,end):\n    stack=[start]\n    visited={start}\n    parent={}\n    while stack:\n        r,c=stack.pop()\n        if (r,c)==end:return reconstruct(parent,end)\n        for dr,dc in dirs:\n            nr,nc=r+dr,c+dc\n            if valid(nr,nc) and (nr,nc) not in visited:\n                visited.add((nr,nc))\n                parent[(nr,nc)]=(r,c)\n                stack.append((nr,nc))\n    return None'},
-    astar:{name:'A*',principle:'<h3>A* 启发式搜索</h3><p>f(n)=g(n)+h(n)</p><ul><li>g(n):已走距离</li><li>h(n):估算剩余</li></ul><div class="pros-cons"><div class="pros"><h4>优点</h4><ul><li>效率高</li><li>最优解</li></ul></div><div class="cons"><h4>缺点</h4><ul><li>实现复杂</li></ul></div></div>',code:'import heapq\n\ndef heuristic(a,b):\n    return abs(a[0]-b[0])+abs(a[1]-b[1])\n\ndef astar(grid,start,end):\n    pq=[(0,start)]\n    g={start:0}\n    parent={}\n    while pq:\n        f,(r,c)=heapq.heappop(pq)\n        if (r,c)==end:return reconstruct(parent,end)\n        for dr,dc in dirs:\n            nr,nc=r+dr,c+dc\n            if valid(nr,nc):\n                ng=g[(r,c)]+1\n                if ng<g.get((nr,nc),99999):\n                    g[(nr,nc)]=ng\n                    f=ng+heuristic((nr,nc),end)\n                    parent[(nr,nc)]=(r,c)\n                    heapq.heappush(pq,(f,(nr,nc)))'},
-    dijkstra:{name:'Dijkstra',principle:'<h3>Dijkstra 最短路径</h3><p>始终优先处理距离最短的节点。</p><h3>特点</h3><ul><li>保证最优解</li><li>无方向性</li></ul><div class="pros-cons"><div class="pros"><h4>优点</h4><ul><li>最优解</li></ul></div><div class="cons"><h4>缺点</h4><ul><li>节点多</li></ul></div></div>',code:'import heapq\n\ndef dijkstra(grid,start,end):\n    pq=[(0,start)]\n    dist={start:0}\n    parent={}\n    while pq:\n        d,(r,c)=heapq.heappop(pq)\n        if (r,c)==end:return reconstruct(parent,end)\n        for dr,dc in dirs:\n            nr,nc=r+dr,c+dc\n            if valid(nr,nc):\n                nd=d+1\n                if nd<dist.get((nr,nc),99999):\n                    dist[(nr,nc)]=nd\n                    parent[(nr,nc)]=(r,c)\n                    heapq.heappush(pq,(nd,(nr,nc)))'},
-    astar2:{name:'A*',principle:'<h3>A* 路径规划</h3><p>Dijkstra的智能改进版，加入启发函数引导方向。</p><div class="pros-cons"><div class="pros"><h4>优点</h4><ul><li>效率高</li></ul></div><div class="cons"><h4>缺点</h4><ul><li>内存大</li></ul></div></div>',code:'import heapq\n\ndef heuristic(a,b):\n    return abs(a[0]-b[0])+abs(a[1]-b[1])\n\ndef astar(grid,start,end):\n    pq=[(0,start)]\n    g={start:0}\n    parent={}\n    while pq:\n        f,(r,c)=heapq.heappop(pq)\n        if (r,c)==end:return reconstruct(parent,end)\n        for dr,dc in dirs:\n            nr,nc=r+dr,c+dc\n            if valid(nr,nc):\n                ng=g[(r,c)]+1\n                if ng<g.get((nr,nc),99999):\n                    g[(nr,nc)]=ng\n                    f=ng+heuristic((nr,nc),end)\n                    parent[(nr,nc)]=(r,c)\n                    heapq.heappush(pq,(f,(nr,nc)))'}
+<h1>AI算法可视化教学系统</h1>
+<div class="container">
+<div class="panel left">
+<button class="btn-case active" onclick="selCase('search')">搜索算法</button>
+<button class="btn-case" onclick="selCase('path')">路径规划</button>
+
+<div id="searchOpts">
+<button class="btn-algo active" onclick="selAlgo('bfs')">BFS 广度优先</button>
+<button class="btn-algo" onclick="selAlgo('dfs')">DFS 深度优先</button>
+<button class="btn-algo" onclick="selAlgo('astar')">A* 启发式</button>
+</div>
+
+<div id="pathOpts" style="display:none">
+<button class="btn-algo active" onclick="selAlgo('dijkstra')">Dijkstra 最短路径</button>
+<button class="btn-algo" onclick="selAlgo('astar2')">A* 启发式</button>
+</div>
+
+<div class="tools">
+<button class="tool-btn active" onclick="setTool('wall')">画墙</button>
+<button class="tool-btn" onclick="setTool('start')">起点</button>
+<button class="tool-btn" onclick="setTool('end')">终点</button>
+<button class="tool-btn" onclick="setTool('erase')">擦除</button>
+</div>
+
+<div class="ctrl">
+<button class="run-btn" onclick="run()">运行</button>
+<button class="rst-btn" onclick="rst()">重置</button>
+</div>
+
+<div class="speed"><label>速度: <span id="spdVal">中</span></label>
+<input type="range" id="spd" min="1" max="100" value="50" oninput="upSpd()"></div>
+
+<div class="stats">
+<div class="stat"><div class="stat-num" id="visCnt">0</div><div class="stat-lbl">访问节点</div></div>
+<div class="stat"><div class="stat-num" id="pathLen">0</div><div class="stat-lbl">路径长度</div></div>
+</div>
+
+<div class="result" id="rslt"></div>
+</div>
+
+<div class="panel mid">
+<div id="grid"></div>
+<div class="legend">
+<div class="legend-item"><div class="box" style="background:#4CAF50;border-radius:50%"></div>起点</div>
+<div class="legend-item"><div class="box" style="background:#f44336"></div>终点</div>
+<div class="legend-item"><div class="box" style="background:#555"></div>墙</div>
+<div class="legend-item"><div class="box" style="background:#e91e63"></div>搜索中</div>
+<div class="legend-item"><div class="box" style="background:#9c27b0"></div>已访问</div>
+<div class="legend-item"><div class="box" style="background:#00d4ff"></div>路径</div>
+</div>
+</div>
+
+<div class="panel right">
+<div class="tabs"><button class="tab active" onclick="showTab('princ')">原理</button><button class="tab" onclick="showTab('code')">代码</button></div>
+<div id="princ" class="content"></div>
+<div id="code" class="content"><pre id="codeTxt"></pre></div>
+</div>
+</div>
+
+<script>
+const R1=12,C1=15,R2=15,C2=20;
+let cur="search",algo="bfs",tool="wall",run=false;
+let maze=[],st={r:2,c:2},en={r:9,c:12};
+
+const algos={
+bfs:{name:"BFS",p:'<h3>广度优先搜索BFS</h3><p>从起点开始，层层向外扩展，像水波纹一样。</p><p><b>特点：</b>队列实现，保证最短路径</p><pre>from collections import deque
+def bfs(s,e):
+ q=deque([s])
+ v={s}
+ while q:
+  r,c=q.popleft()
+  if (r,c)==e:return path
+  for dr,dc in dirs:
+   nr,nc=r+dr,c+dc
+   if valid(nr,nc)and(nr,nc)not in v:
+    v.add((nr,nc));q.append((nr,nc))'},
+dfs:{name:"DFS",p:'<h3>深度优先搜索DFS</h3><p>一条路走到黑，不行再回溯。</p><p><b>特点：</b>栈实现，不保证最短</p><pre>def dfs(s,e):
+ s=[s];v={}
+ while stack:
+  r,c=stack.pop()
+  if (r,c)==e:return path
+  for dr,dc in dirs:
+   nr,nc=r+dr,c+dc
+   if valid(nr,nc)and(nr,nc)not in v:
+    v.add((nr,nc));stack.append((nr,nc))'},
+astar:{name:"A*",p:'<h3>A*启发式搜索</h3><p>f=g+h,g是已走距离，h是估算距离。</p><p><b>特点：</b>优先队列，智能引导，保证最短</p><pre>import heapq
+def h(a,b):return abs(a[0]-b[0])+abs(a[1]-b[1])
+def astar(s,e):
+ pq=[(0,s)];g={s:0}
+ while pq:
+  f,(r,c)=heapq.heappop(pq)
+  if (r,c)==e:return path
+  for dr,dc in dirs:
+   nr,nc=r+dr,c+dc
+   if valid(nr,nc):
+    ng=g[(r,c)]+1
+    if ng<g.get((nr,nc),999):
+     g[(nr,nc)]=ng
+     heapq.heappush(pq,(ng+h((nr,nc),e),(nr,nc)))'},
+dijkstra:{name:"Dijkstra",p:'<h3>Dijkstra最短路径</h3><p>始终优先处理距离最短的节点。</p><p><b>特点：</b>保证最优解，无方向引导</p><pre>import heapq
+def dijk(s,e):
+ pq=[(0,s)];d={s:0}
+ while pq:
+  dist,(r,c)=heapq.heappop(pq)
+  if (r,c)==e:return path
+  for dr,dc in dirs:
+   nr,nc=r+dr,c+dc
+   if valid(nr,nc):
+    nd=dist+1
+    if nd<d.get((nr,nc),999):
+     d[(nr,nc)]=nd
+     heapq.heappush(pq,(nd,(nr,nc)))'},
+astar2:{name:"A*",p:'<h3>A*路径规划</h3><p>同A*搜索算法，用于路径规划。</p><pre>import heapq
+def h(a,b):return abs(a[0]-b[0])+abs(a[1]-b[1])
+def astar(s,e):
+ pq=[(0,s)];g={s:0}
+ while pq:
+  f,(r,c)=heapq.heappop(pq)
+  if (r,c)==e:return path
+  for dr,dc in dirs:
+   nr,nc=r+dr,c+dc
+   if valid(nr,nc):
+    ng=g[(r,c)]+1
+    if ng<g.get((nr,nc),999):
+     g[(nr,nc)]=ng
+     heapq.heappush(pq,(ng+h((nr,nc),e),(nr,nc)))'}
 };
-function initSearch(){searchMaze=[];for(let r=0;r<SEARCH_ROWS;r++){searchMaze[r]=[];for(let c=0;c<SEARCH_COLS;c++)searchMaze[r][c]=0;}renderSearch();}
-function initPath(){pathMaze=[];for(let r=0;r<PATH_ROWS;r++){pathMaze[r]=[];for(let c=0;c<PATH_COLS;c++)pathMaze[r][c]=0;}renderPath();}
-function renderSearch(){const el=document.getElementById('searchMaze');el.innerHTML='';
-for(let r=0;r<SEARCH_ROWS;r++){for(let c=0;c<SEARCH_COLS;c++){const div=document.createElement('div');
-div.className='search-cell';div.dataset.r=r;div.dataset.c=c;
-if(r===searchStart.r&&c===searchStart.c){div.classList.add('start');div.textContent='S';}
-else if(r===searchEnd.r&&c===searchEnd.c){div.classList.add('end');div.textContent='E';}
-else if(searchMaze[r][c]===1)div.classList.add('wall');
-div.onclick=()=>handleSearchClick(r,c);el.appendChild(div);}}}
-function renderPath(){const el=document.getElementById('maze');el.innerHTML='';
-for(let r=0;r<PATH_ROWS;r++){for(let c=0;c<PATH_COLS;c++){const div=document.createElement('div');
-div.className='cell';div.dataset.r=r;div.dataset.c=c;
-if(r===pathStart.r&&c===pathStart.c)div.classList.add('start');
-else if(r===pathEnd.r&&c===pathEnd.c)div.classList.add('end');
-else if(pathMaze[r][c]===1)div.classList.add('wall');
-div.onclick=()=>handlePathClick(r,c);el.appendChild(div);}}}
-function handleSearchClick(r,c){if(isRunning)return;
-if(editMode==='wall'){if(!isSearchSE(r,c))searchMaze[r][c]=searchMaze[r][c]?0:1;}
-else if(editMode==='start'){if(searchMaze[r][c]!==1)searchStart={r,c};}
-else if(editMode==='end'){if(searchMaze[r][c]!==1)searchEnd={r,c};}
-else if(editMode==='erase')searchMaze[r][c]=0;renderSearch();}
-function handlePathClick(r,c){if(isRunning)return;
-if(editMode==='wall'){if(!isPathSE(r,c))pathMaze[r][c]=pathMaze[r][c]?0:1;}
-else if(editMode==='start'){if(pathMaze[r][c]!==1)pathStart={r,c};}
-else if(editMode==='end'){if(pathMaze[r][c]!==1)pathEnd={r,c};}
-else if(editMode==='erase')pathMaze[r][c]=0;renderPath();}
-function isSearchSE(r,c){return(r===searchStart.r&&c===searchStart.c)||(r===searchEnd.r&&c===searchEnd.c);}
-function isPathSE(r,c){return(r===pathStart.r&&c===pathStart.c)||(r===pathEnd.r&&c===pathEnd.c);}
-function selectCase(caseName){currentCase=caseName;
-document.querySelectorAll('.case-btn').forEach(b=>b.classList.remove('active'));
-document.querySelector('.case-btn.'+caseName).classList.add('active');
-document.querySelectorAll('.case-panel').forEach(p=>p.classList.remove('active'));
-document.getElementById(caseName+'Panel').classList.add('active');
-if(caseName==='search'){document.getElementById('searchMaze').classList.add('active');}
-else{document.getElementById('maze').classList.add('active');}
-document.getElementById('vizTitle').textContent=caseName==='search'?'搜索算法可视化':'路径规划可视化';
-updateInfo();}
-function selectAlgo(algo){if(currentCase==='search'){currentSearchAlgo=algo;document.querySelectorAll('#searchPanel .algo-btn').forEach(b=>b.classList.remove('active'));}
-else{currentPathAlgo=algo;document.querySelectorAll('#pathPanel .algo-btn').forEach(b=>b.classList.remove('active'));}
-event.target.classList.add('active');updateInfo();}
-function setEdit(mode){editMode=mode;document.querySelectorAll('.edit-btn').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');}
-function updateInfo(){const algo=currentCase==='search'?currentSearchAlgo:currentPathAlgo;
-document.getElementById('原理').innerHTML=algoInfo[algo].principle;
-document.getElementById('codeDisplay').textContent=algoInfo[algo].code;}
-function showTab(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-event.target.classList.add('active');document.getElementById(tab).classList.add('active');}
-function updateSpeed(){let v=document.getElementById('speedSlider').value;
-document.getElementById('speedVal').textContent=['很慢','慢','中','快','很快'][Math.floor((v-1)/20)];}
-function getSpeed(){return Math.max(5,150-document.getElementById('speedSlider').value*1.5);}
-function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
-function resetMaze(){if(isRunning)return;
-if(currentCase==='search'){initSearch();searchStart={r:2,c:2};searchEnd={r:9,c:12};}
-else{initPath();pathStart={r:2,c:2};pathEnd={r:12,c:17};}
-document.getElementById('visitedCount').textContent='0';
-document.getElementById('pathLength').textContent='0';
-document.getElementById('runTime').textContent='0ms';
-document.getElementById('result').className='result';}
-function clearVis(type){const cells=document.querySelectorAll('.'+type);
-cells.forEach(c=>{c.classList.remove('searching','visited','path');
-const r=parseInt(c.dataset.r),cc=parseInt(c.dataset.c);
-if(type==='search-cell'){if(r===searchStart.r&&cc===searchStart.c){c.classList.add('start');c.textContent='S';}
-else if(r===searchEnd.r&&cc===searchEnd.c){c.classList.add('end');c.textContent='E';}
-else if(searchMaze[r][cc]===1)c.classList.add('wall');else c.textContent='';}
-else{if(r===pathStart.r&&cc===pathStart.c)c.classList.add('start');
-else if(r===pathEnd.r&&cc===pathEnd.c)c.classList.add('end');
-else if(pathMaze[r][cc]===1)c.classList.add('wall');}});}
-async function runAI(){if(isRunning)return;isRunning=true;
-document.getElementById('result').className='result';
-const startTime=Date.now();let visitedCount=0,path=[];
-if(currentCase==='search'){clearVis('search-cell');
-const algo=currentSearchAlgo;
-if(algo==='bfs')path=await bfs(visitedCount);
-else if(algo==='dfs')path=await dfs(visitedCount);
-else path=await astarSearch(visitedCount);}
-else{clearVis('cell');
-const algo=currentPathAlgo;
-if(algo==='dijkstra')path=await dijkstra(visitedCount);
-else path=await astarPath(visitedCount);}
-const runTime=Date.now()-startTime;
-document.getElementById('visitedCount').textContent=visitedCount;
-document.getElementById('runTime').textContent=runTime+'ms';
-if(path&&path.length>0){const cellType=currentCase==='search'?'search-cell':'cell';
-const cols=currentCase==='search'?SEARCH_COLS:PATH_COLS;
-const cells=document.querySelectorAll('.'+cellType);
-for(let i=0;i<path.length;i++){const[r,c]=path[i];
-const idx=r*cols+c;
-cells[idx].classList.remove('searching','visited');
-cells[idx].classList.add('path');await sleep(30);}
-document.getElementById('pathLength').textContent=path.length-1;
-document.getElementById('result').className='result show success';
-document.getElementById('result').textContent='找到路径！长度:'+(path.length-1);}
-else{document.getElementById('result').className='result show fail';
-document.getElementById('result').textContent='无法到达！';}
-isRunning=false;}
+
+function init(){
+let r=cur==="search"?R1:R2,c=cur==="search"?C1:C2;
+maze=[];for(let i=0;i<r;i++){maze[i]=[];for(let j=0;j<c;j++)maze[i][j]=0;}
+st=cur==="search"?{r:2,c:2}:{r:2,c:2};
+en=cur==="search"?{r:9,c:12}:{r:12,c:17};
+draw();
+upInfo();
+}
+
+function draw(){
+let r=cur==="search"?R1:R2,c=cur==="search"?C1:C2;
+let g=document.getElementById("grid");
+g.style.gridTemplateColumns="repeat("+c+",25px)";
+g.innerHTML="";
+for(let i=0;i<r;i++){
+for(let j=0;j<c;j++){
+let d=document.createElement("div");
+d.className="cell";d.dataset.r=i;d.dataset.c=j;
+if(i===st.r&&j===st.c)d.classList.add("start");
+else if(i===en.r&&j===en.c)d.classList.add("end");
+else if(maze[i][j]===1)d.classList.add("wall");
+d.onclick=()=>click(i,j);
+g.appendChild(d);
+}}}
+function click(r,c){
+if(run)return;
+if(tool==="wall"){if(!isSE(r,c))maze[r][c]=maze[r][c]?0:1;}
+else if(tool==="start"){if(maze[r][c]!==1)st={r,c};}
+else if(tool==="end"){if(maze[r][c]!==1)en={r,c};}
+else if(tool==="erase")maze[r][c]=0;
+draw();
+}
+function isSE(r,c){return(r===st.r&&c===st.c)||(r===en.r&&c===en.c);}
+
+function selCase(x){
+cur=x;document.querySelectorAll(".btn-case").forEach(b=>b.classList.remove("active"));
+document.querySelector(".btn-case:nth-child("+(x==="search"?1:2)+")").classList.add("active");
+document.getElementById("searchOpts").style.display=x==="search"?"block":"none";
+document.getElementById("pathOpts").style.display=x==="path"?"block":"none";
+if(x==="search"){algo="bfs";document.querySelectorAll("#searchOpts .btn-algo")[0].classList.add("active");}
+else{algo="dijkstra";document.querySelectorAll("#pathOpts .btn-algo")[0].classList.add("active");}
+init();
+}
+function selAlgo(x){algo=x;
+document.querySelectorAll(".btn-algo").forEach(b=>b.classList.remove("active"));
+event.target.classList.add("active");upInfo();
+}
+function setTool(x){tool=x;document.querySelectorAll(".tool-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");}
+function upSpd(){document.getElementById("spdVal").textContent=["很慢","慢","中","快","很快"][Math.floor((document.getElementById("spd").value-1)/20)];}
+function spd(){return Math.max(5,150-document.getElementById("spd").value*1.5);}
+function slp(ms){return new Promise(r=>setTimeout(r,ms));}
+
+function upInfo(){document.getElementById("princ").innerHTML=algos[algo].p;document.getElementById("codeTxt").textContent=algos[algo].p.replace(/<[^>]+>/g,"");}
+function showTab(x){document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelectorAll(".content").forEach(c=>c.classList.remove("active"));event.target.classList.add("active");document.getElementById(x).classList.add("active");}
+
+function rst(){if(run)return;init();document.getElementById("visCnt").textContent="0";document.getElementById("pathLen").textContent="0";document.getElementById("rslt").className="result";}
+
+async function run(){
+if(run)return;run=true;
+document.getElementById("rslt").className="result";
+let vc=0,path=[];
+if(cur==="search"){clr();if(algo==="bfs")path=await bfs(vc);else if(algo==="dfs")path=await dfs(vc);else path=await astar(vc);}
+else{clr();if(algo==="dijkstra")path=await dijk(vc);else path=await astar2(vc);}
+document.getElementById("visCnt").textContent=vc;
+if(path.length>0){
+let cells=document.querySelectorAll(".cell");
+let c=cur==="search"?C1:C2;
+for(let i=0;i<path.length;i++){
+let[r,px]=path[i];
+cells[r*c+px].classList.remove("searching","visited");
+cells[r*c+px].classList.add("path");await slp(30);}
+document.getElementById("pathLen").textContent=path.length-1;
+document.getElementById("rslt").className="result show ok";document.getElementById("rslt").textContent="找到路径！长度:"+(path.length-1);}
+else{document.getElementById("rslt").className="result show no";document.getElementById("rslt").textContent="无法到达！";}
+run=false;
+}
+function clr(){document.querySelectorAll(".cell").forEach(c=>{c.classList.remove("searching","visited","path");let r=parseInt(c.dataset.r),cc=parseInt(c.dataset.c);if(r===st.r&&cc===st.c)c.classList.add("start");else if(r===en.r&&cc===en.c)c.classList.add("end");else if(maze[r][cc]===1)c.classList.add("wall");});}
+
 function dirs(){return[[0,1],[1,0],[0,-1],[-1,0]];}
-function heuristic(r,c,er,ec){return Math.abs(r-er)+Math.abs(c-ec);}
-async function bfs(visitedCount){let queue=[[searchStart.r,searchStart.c,[]]];
-let visited=new Set();let parent={};const cells=document.querySelectorAll('.search-cell');
-while(queue.length>0){let[r,c,path]=queue.shift();let key=r+','+c;
-if(visited.has(key))continue;visited.add(key);visitedCount++;
-document.getElementById('visitedCount').textContent=visitedCount;
-if(r===searchEnd.r&&c===searchEnd.c)return reconstructPath(parent,r,c);
-let idx=r*SEARCH_COLS+c;
-if(!isSearchSE(r,c))cells[idx].classList.add('searching');
-await sleep(getSpeed());
-if(!isSearchSE(r,c)){cells[idx].classList.remove('searching');cells[idx].classList.add('visited');}
-for(let[dr,dc]of dirs()){let nr=r+dr,nc=c+dc,nkey=nr+','+nc;
-if(nr>=0&&nr<SEARCH_ROWS&&nc>=0&&nc<SEARCH_COLS&&searchMaze[nr][nc]!==1&&!visited.has(nkey)){parent[nkey]=[r,c];queue.push([nr,nc,path.concat([[r,c]])]);}}}
+function h(r,c){return Math.abs(r-en.r)+Math.abs(c-en.c);}
+
+async function bfs(vc){let q=[[st.r,st.c,[]]];let v=new Set();let par={};let cells=document.querySelectorAll(".cell");let c=C1;
+while(q.length){let[r,px,p]=q.shift();let k=r+","+px;
+if(v.has(k))continue;v.add(k);vc++;document.getElementById("visCnt").textContent=vc;
+if(r===en.r&&px===en.c)return rp(par,r,px);
+let idx=r*c+px;if(!isSE(r,px))cells[idx].classList.add("searching");await slp(spd());if(!isSE(r,px)){cells[idx].classList.remove("searching");cells[idx].classList.add("visited");}
+for(let[dR,dC]of dirs()){let nr=r+dR,nc=px+dC,nk=nr+","+nc;
+if(nr>=0&&nr<R1&&nc>=0&&nc<C1&&maze[nr][nc]!==1&&!v.has(nk)){par[nk]=[r,px];q.push([nr,nc,p.concat([[r,px]])]);}}}
 return[];}
-async function dfs(visitedCount){let stack=[[searchStart.r,searchStart.c,[]]];
-let visited=new Set();let parent={};const cells=document.querySelectorAll('.search-cell');
-while(stack.length>0){let[r,c,path]=stack.pop();let key=r+','+c;
-if(visited.has(key))continue;visited.add(key);visitedCount++;
-document.getElementById('visitedCount').textContent=visitedCount;
-if(r===searchEnd.r&&c===searchEnd.c)return reconstructPath(parent,r,c);
-let idx=r*SEARCH_COLS+c;
-if(!isSearchSE(r,c))cells[idx].classList.add('searching');
-await sleep(getSpeed());
-if(!isSearchSE(r,c)){cells[idx].classList.remove('searching');cells[idx].classList.add('visited');}
-for(let i=dirs().length-1;i>=0;i--){let[dr,dc]=dirs()[i];
-let nr=r+dr,nc=c+dc,nkey=nr+','+nc;
-if(nr>=0&&nr<SEARCH_ROWS&&nc>=0&&nc<SEARCH_COLS&&searchMaze[nr][nc]!==1&&!visited.has(nkey)){parent[nkey]=[r,c];stack.push([nr,nc,path.concat([[r,c]])]);}}}
+
+async function dfs(vc){let s=[[st.r,st.c,[]]];let v=new Set();let par={};let cells=document.querySelectorAll(".cell");let c=C1;
+while(s.length){let[r,px,p]=s.pop();let k=r+","+px;
+if(v.has(k))continue;v.add(k);vc++;document.getElementById("visCnt").textContent=vc;
+if(r===en.r&&px===en.c)return rp(par,r,px);
+let idx=r*c+px;if(!isSE(r,px))cells[idx].classList.add("searching");await slp(spd());if(!isSE(r,px)){cells[idx].classList.remove("searching");cells[idx].classList.add("visited");}
+for(let i=dirs().length-1;i>=0;i--){let[dR,dC]=dirs()[i];let nr=r+dR,nc=px+dC,nk=nr+","+nc;
+if(nr>=0&&nr<R1&&nc>=0&&nc<C1&&maze[nr][nc]!==1&&!v.has(nk)){par[nk]=[r,px];s.push([nr,nc,p.concat([[r,px]])]);}}}
 return[];}
-async function astarSearch(visitedCount){let pq=[[heuristic(searchStart.r,searchStart.c,searchEnd.r,searchEnd.c),0,searchStart.r,searchStart.c,[]]];
-let closed=new Set();let gScore={};let parent={};const cells=document.querySelectorAll('.search-cell');
-while(pq.length>0){pq.sort((a,b)=>a[0]-b[0]);let[f,g,r,c,path]=pq.shift();let key=r+','+c;
-if(closed.has(key))continue;closed.add(key);visitedCount++;
-document.getElementById('visitedCount').textContent=visitedCount;
-if(r===searchEnd.r&&c===searchEnd.c)return reconstructPath(parent,r,c);
-let idx=r*SEARCH_COLS+c;
-if(!isSearchSE(r,c))cells[idx].classList.add('searching');
-await sleep(getSpeed());
-if(!isSearchSE(r,c)){cells[idx].classList.remove('searching');cells[idx].classList.add('visited');}
-for(let[dr,dc]of dirs()){let nr=r+dr,nc=c+dc,nkey=nr+','+nc;
-if(nr>=0&&nr<SEARCH_ROWS&&nc>=0&&nc<SEARCH_COLS&&searchMaze[nr][nc]!==1&&!closed.has(nkey)){let ng=g+1;
-if(ng<(gScore[nkey]||Infinity)){gScore[nkey]=ng;let nf=ng+heuristic(nr,nc,searchEnd.r,searchEnd.c);
-parent[nkey]=[r,c];pq.push([nf,ng,nr,nc,path.concat([[r,c]])]);}}}}
+
+async function astar(vc){let pq=[[h(st.r,st.c),0,st.r,st.c,[]]];let cl=new Set();let g={};let par={};let cells=document.querySelectorAll(".cell");let c=C1;
+while(pq.length){pq.sort((a,b)=>a[0]-b[0]);let[f,gv,r,px,p]=pq.shift();let k=r+","+px;
+if(cl.has(k))continue;cl.add(k);vc++;document.getElementById("visCnt").textContent=vc;
+if(r===en.r&&px===en.c)return rp(par,r,px);
+let idx=r*c+px;if(!isSE(r,px))cells[idx].classList.add("searching");await slp(spd());if(!isSE(r,px)){cells[idx].classList.remove("searching");cells[idx].classList.add("visited");}
+for(let[dR,dC]of dirs()){let nr=r+dR,nc=px+dC,nk=nr+","+nc;
+if(nr>=0&&nr<R1&&nc>=0&&nc<C1&&maze[nr][nc]!==1&&!cl.has(nk)){let ng=gv+1;
+if(ng<(g[nk]||Infinity)){g[nk]=ng;let nf=ng+h(nr,nc);par[nk]=[r,px];pq.push([nf,ng,nr,nc,p.concat([[r,px]])]);}}}}
 return[];}
-async function dijkstra(visitedCount){let pq=[[0,pathStart.r,pathStart.c,[]]];
-let visited=new Set();let dist={};let parent={};const cells=document.querySelectorAll('.cell');
-while(pq.length>0){pq.sort((a,b)=>a[0]-b[0]);let[d,r,c,path]=pq.shift();let key=r+','+c;
-if(visited.has(key))continue;visited.add(key);visitedCount++;
-document.getElementById('visitedCount').textContent=visitedCount;
-if(r===pathEnd.r&&c===pathEnd.c)return reconstructPath(parent,r,c);
-let idx=r*PATH_COLS+c;
-if(!isPathSE(r,c))cells[idx].classList.add('searching');
-await sleep(getSpeed());
-if(!isPathSE(r,c)){cells[idx].classList.remove('searching');cells[idx].classList.add('visited');}
-for(let[dr,dc]of dirs()){let nr=r+dr,nc=c+dc,nkey=nr+','+nc;
-if(nr>=0&&nr<PATH_ROWS&&nc>=0&&nc<PATH_COLS&&pathMaze[nr][nc]!==1&&!visited.has(nkey)){let nd=d+1;
-if(nd<(dist[nkey]||Infinity)){dist[nkey]=nd;parent[nkey]=[r,c];pq.push([nd,nr,nc,path.concat([[r,c]])]);}}}
+
+async function dijk(vc){let pq=[[0,st.r,st.c,[]]];let v=new Set();let d={};let par={};let cells=document.querySelectorAll(".cell");let c=C2;
+while(pq.length){pq.sort((a,b)=>a[0]-b[0]);let[dist,r,px,p]=pq.shift();let k=r+","+px;
+if(v.has(k))continue;v.add(k);vc++;document.getElementById("visCnt").textContent=vc;
+if(r===en.r&&px===en.c)return rp(par,r,px);
+let idx=r*c+px;if(!isSE(r,px))cells[idx].classList.add("searching");await slp(spd());if(!isSE(r,px)){cells[idx].classList.remove("searching");cells[idx].classList.add("visited");}
+for(let[dR,dC]of dirs()){let nr=r+dR,nc=px+dC,nk=nr+","+nc;
+if(nr>=0&&nr<R2&&nc>=0&&nc<C2&&maze[nr][nc]!==1&&!v.has(nk)){let nd=dist+1;
+if(nd<(d[nk]||Infinity)){d[nk]=nd;par[nk]=[r,px];pq.push([nd,nr,nc,p.concat([[r,px]])]);}}}
 return[];}
-async function astarPath(visitedCount){let pq=[[heuristic(pathStart.r,pathStart.c,pathEnd.r,pathEnd.c),0,pathStart.r,pathStart.c,[]]];
-let closed=new Set();let gScore={};let parent={};const cells=document.querySelectorAll('.cell');
-while(pq.length>0){pq.sort((a,b)=>a[0]-b[0]);let[f,g,r,c,path]=pq.shift();let key=r+','+c;
-if(closed.has(key))continue;closed.add(key);visitedCount++;
-document.getElementById('visitedCount').textContent=visitedCount;
-if(r===pathEnd.r&&c===pathEnd.c)return reconstructPath(parent,r,c);
-let idx=r*PATH_COLS+c;
-if(!isPathSE(r,c))cells[idx].classList.add('searching');
-await sleep(getSpeed());
-if(!isPathSE(r,c)){cells[idx].classList.remove('searching');cells[idx].classList.add('visited');}
-for(let[dr,dc]of dirs()){let nr=r+dr,nc=c+dc,nkey=nr+','+nc;
-if(nr>=0&&nr<PATH_ROWS&&nc>=0&&nc<PATH_COLS&&pathMaze[nr][nc]!==1&&!closed.has(nkey)){let ng=g+1;
-if(ng<(gScore[nkey]||Infinity)){gScore[nkey]=ng;let nf=ng+heuristic(nr,nc,pathEnd.r,pathEnd.c);
-parent[nkey]=[r,c];pq.push([nf,ng,nr,nc,path.concat([[r,c]])]);}}}}
+
+async function astar2(vc){let pq=[[h(st.r,st.c),0,st.r,st.c,[]]];let cl=new Set();let g={};let par={};let cells=document.querySelectorAll(".cell");let c=C2;
+while(pq.length){pq.sort((a,b)=>a[0]-b[0]);let[f,gv,r,px,p]=pq.shift();let k=r+","+px;
+if(cl.has(k))continue;cl.add(k);vc++;document.getElementById("visCnt").textContent=vc;
+if(r===en.r&&px===en.c)return rp(par,r,px);
+let idx=r*c+px;if(!isSE(r,px))cells[idx].classList.add("searching");await slp(spd());if(!isSE(r,px)){cells[idx].classList.remove("searching");cells[idx].classList.add("visited");}
+for(let[dR,dC]of dirs()){let nr=r+dR,nc=px+dC,nk=nr+","+nc;
+if(nr>=0&&nr<R2&&nc>=0&&nc<C2&&maze[nr][nc]!==1&&!cl.has(nk)){let ng=gv+1;
+if(ng<(g[nk]||Infinity)){g[nk]=ng;let nf=ng+h(nr,nc);par[nk]=[r,px];pq.push([nf,ng,nr,nc,p.concat([[r,px]])]);}}}}
 return[];}
-function reconstructPath(parent,endR,endC){let path=[],key=endR+','+endC;
-while(key){let[r,c]=key.split(',').map(Number);path.unshift([r,c]);key=parent[key]?parent[key][0]+','+parent[key][1]:null;}
-return path;}
-initSearch();initPath();updateInfo();
-    <\/script>
+
+function rp(par,er,ec){let path=[],k=er+","+ec;while(k){let[r,c]=k.split(",").map(Number);path.unshift([r,c]);k=par[k]?par[k][0]+","+par[k][1]:null;}return path;}
+
+init();
+</script>
 </body>
 </html>
