@@ -2,9 +2,9 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>AI算法可视化教学系统</title>
+<title>AI算法教学系统</title>
 <style>
-body{font-family:Microsoft YaHei;background:#1a1a2e;color:#eee;padding:20px;margin:0}
+body{font-family:Microsoft YaHei;background:#1a1a2e;color:#eee;padding:20px}
 h1{text-align:center;color:#00d4ff}
 .container{display:flex;gap:20px;max-width:1400px;margin:0 auto;flex-wrap:wrap}
 .panel{background:#1e1e2e;border-radius:10px;padding:15px}
@@ -42,7 +42,6 @@ h1{text-align:center;color:#00d4ff}
 .tab{flex:1;padding:8px;background:#333;border:none;border-radius:5px;color:#aaa;cursor:pointer}
 .tab.active{background:#667eea;color:#fff}
 .content{height:350px;overflow-y:auto;font-size:12px}
-.content h3{color:#00d4ff;margin:10px 0 5px}
 pre{background:#111;padding:10px;border-radius:5px;font-size:11px;overflow-x:auto;margin:5px 0}
 .result{padding:10px;border-radius:5px;text-align:center;margin:10px 0;display:none}
 .result.show{display:block}
@@ -54,43 +53,35 @@ pre{background:#111;padding:10px;border-radius:5px;font-size:11px;overflow-x:aut
 <h1>AI算法可视化教学系统</h1>
 <div class="container">
 <div class="panel left">
-<button class="btn-case active" onclick="selCase('search')">搜索算法</button>
-<button class="btn-case" onclick="selCase('path')">路径规划</button>
-
+<button class="btn-case active" id="btnSearch" onclick="selCase('search')">搜索算法</button>
+<button class="btn-case" id="btnPath" onclick="selCase('path')">路径规划</button>
 <div id="searchOpts">
-<button class="btn-algo active" onclick="selAlgo('bfs')">BFS 广度优先</button>
-<button class="btn-algo" onclick="selAlgo('dfs')">DFS 深度优先</button>
-<button class="btn-algo" onclick="selAlgo('astar')">A* 启发式</button>
+<button class="btn-algo active" id="btnBfs" onclick="selAlgo('bfs')">BFS 广度优先</button>
+<button class="btn-algo" id="btnDfs" onclick="selAlgo('dfs')">DFS 深度优先</button>
+<button class="btn-algo" id="btnAstar" onclick="selAlgo('astar')">A* 启发式</button>
 </div>
-
 <div id="pathOpts" style="display:none">
-<button class="btn-algo active" onclick="selAlgo('dijkstra')">Dijkstra 最短路径</button>
-<button class="btn-algo" onclick="selAlgo('astar2')">A* 启发式</button>
+<button class="btn-algo active" id="btnDijk" onclick="selAlgo('dijkstra')">Dijkstra</button>
+<button class="btn-algo" id="btnAstar2" onclick="selAlgo('astar2')">A* 路径规划</button>
 </div>
-
 <div class="tools">
 <button class="tool-btn active" onclick="setTool('wall')">画墙</button>
 <button class="tool-btn" onclick="setTool('start')">起点</button>
 <button class="tool-btn" onclick="setTool('end')">终点</button>
 <button class="tool-btn" onclick="setTool('erase')">擦除</button>
 </div>
-
 <div class="ctrl">
 <button class="run-btn" onclick="run()">运行</button>
 <button class="rst-btn" onclick="rst()">重置</button>
 </div>
-
 <div class="speed"><label>速度: <span id="spdVal">中</span></label>
 <input type="range" id="spd" min="1" max="100" value="50" oninput="upSpd()"></div>
-
 <div class="stats">
 <div class="stat"><div class="stat-num" id="visCnt">0</div><div class="stat-lbl">访问节点</div></div>
 <div class="stat"><div class="stat-num" id="pathLen">0</div><div class="stat-lbl">路径长度</div></div>
 </div>
-
 <div class="result" id="rslt"></div>
 </div>
-
 <div class="panel mid">
 <div id="grid"></div>
 <div class="legend">
@@ -102,213 +93,189 @@ pre{background:#111;padding:10px;border-radius:5px;font-size:11px;overflow-x:aut
 <div class="legend-item"><div class="box" style="background:#00d4ff"></div>路径</div>
 </div>
 </div>
-
 <div class="panel right">
 <div class="tabs"><button class="tab active" onclick="showTab('princ')">原理</button><button class="tab" onclick="showTab('code')">代码</button></div>
 <div id="princ" class="content"></div>
 <div id="code" class="content"><pre id="codeTxt"></pre></div>
 </div>
 </div>
-
 <script>
-const R1=12,C1=15,R2=15,C2=20;
-let cur="search",algo="bfs",tool="wall",run=false;
-let maze=[],st={r:2,c:2},en={r:9,c:12};
+var R1 = 12, C1 = 15, R2 = 15, C2 = 20;
+var cur = "search", algo = "bfs", tool = "wall", isRunning = false;
+var maze = [], st = {r:2,c:2}, en = {r:9,c:12};
 
-const algos={
-bfs:{name:"BFS",p:'<h3>广度优先搜索BFS</h3><p>从起点开始，层层向外扩展，像水波纹一样。</p><p><b>特点：</b>队列实现，保证最短路径</p><pre>from collections import deque
-def bfs(s,e):
- q=deque([s])
- v={s}
- while q:
-  r,c=q.popleft()
-  if (r,c)==e:return path
-  for dr,dc in dirs:
-   nr,nc=r+dr,c+dc
-   if valid(nr,nc)and(nr,nc)not in v:
-    v.add((nr,nc));q.append((nr,nc))'},
-dfs:{name:"DFS",p:'<h3>深度优先搜索DFS</h3><p>一条路走到黑，不行再回溯。</p><p><b>特点：</b>栈实现，不保证最短</p><pre>def dfs(s,e):
- s=[s];v={}
- while stack:
-  r,c=stack.pop()
-  if (r,c)==e:return path
-  for dr,dc in dirs:
-   nr,nc=r+dr,c+dc
-   if valid(nr,nc)and(nr,nc)not in v:
-    v.add((nr,nc));stack.append((nr,nc))'},
-astar:{name:"A*",p:'<h3>A*启发式搜索</h3><p>f=g+h,g是已走距离，h是估算距离。</p><p><b>特点：</b>优先队列，智能引导，保证最短</p><pre>import heapq
-def h(a,b):return abs(a[0]-b[0])+abs(a[1]-b[1])
-def astar(s,e):
- pq=[(0,s)];g={s:0}
- while pq:
-  f,(r,c)=heapq.heappop(pq)
-  if (r,c)==e:return path
-  for dr,dc in dirs:
-   nr,nc=r+dr,c+dc
-   if valid(nr,nc):
-    ng=g[(r,c)]+1
-    if ng<g.get((nr,nc),999):
-     g[(nr,nc)]=ng
-     heapq.heappush(pq,(ng+h((nr,nc),e),(nr,nc)))'},
-dijkstra:{name:"Dijkstra",p:'<h3>Dijkstra最短路径</h3><p>始终优先处理距离最短的节点。</p><p><b>特点：</b>保证最优解，无方向引导</p><pre>import heapq
-def dijk(s,e):
- pq=[(0,s)];d={s:0}
- while pq:
-  dist,(r,c)=heapq.heappop(pq)
-  if (r,c)==e:return path
-  for dr,dc in dirs:
-   nr,nc=r+dr,c+dc
-   if valid(nr,nc):
-    nd=dist+1
-    if nd<d.get((nr,nc),999):
-     d[(nr,nc)]=nd
-     heapq.heappush(pq,(nd,(nr,nc)))'},
-astar2:{name:"A*",p:'<h3>A*路径规划</h3><p>同A*搜索算法，用于路径规划。</p><pre>import heapq
-def h(a,b):return abs(a[0]-b[0])+abs(a[1]-b[1])
-def astar(s,e):
- pq=[(0,s)];g={s:0}
- while pq:
-  f,(r,c)=heapq.heappop(pq)
-  if (r,c)==e:return path
-  for dr,dc in dirs:
-   nr,nc=r+dr,c+dc
-   if valid(nr,nc):
-    ng=g[(r,c)]+1
-    if ng<g.get((nr,nc),999):
-     g[(nr,nc)]=ng
-     heapq.heappush(pq,(ng+h((nr,nc),e),(nr,nc)))'}
+var algos = {
+bfs:{p:"<h3>BFS 广度优先搜索</h3><p>从起点开始，层层向外扩展，像水波纹一样扩散搜索。</p><p><b>特点：</b>队列实现，保证最短路径</p><pre>from collections import deque\ndef bfs(s,e):\n q=deque([s])\n v={s}\n while q:\n  r,c=q.popleft()\n  if (r,c)==e:return path\n  for dr,dc in dirs:\n   nr,nc=r+dr,c+dc\n   if valid(nr,nc)and(nr,nc)not in v:\n    v.add((nr,nc));q.append((nr,nc))"},
+dfs:{p:"<h3>DFS 深度优先搜索</h3><p>一条路走到黑，不行再回溯。</p><p><b>特点：</b>栈实现，不保证最短</p><pre>def dfs(s,e):\n stack=[s]\n visited={}\n while stack:\n  r,c=stack.pop()\n  if (r,c)==e:return path\n  for dr,dc in dirs:\n   nr,nc=r+dr,c+dc\n   if valid(nr,nc)and(nr,nc)not in visited:\n    visited.add((nr,nc));stack.append((nr,nc))"},
+astar:{p:"<h3>A* 启发式搜索</h3><p>f=g+h，g是已走距离，h是估算距离。</p><p><b>特点：</b>优先队列，智能引导，保证最短</p><pre>import heapq\ndef h(a,b):return abs(a[0]-b[0])+abs(a[1]-b[1])\ndef astar(s,e):\n pq=[(0,s)];g={s:0}\n while pq:\n  f,(r,c)=heapq.heappop(pq)\n  if (r,c)==e:return path\n  for dr,dc in dirs:\n   nr,nc=r+dr,c+dc\n   if valid(nr,nc):\n    ng=g[(r,c)]+1\n    if ng<g.get((nr,nc),999):\n     g[(nr,nc)]=ng\n     heapq.heappush(pq,(ng+h((nr,nc),e),(nr,nc)))"},
+dijkstra:{p:"<h3>Dijkstra 最短路径</h3><p>始终优先处理距离最短的节点。</p><p><b>特点：</b>保证最优解</p><pre>import heapq\ndef dijk(s,e):\n pq=[(0,s)];d={s:0}\n while pq:\n  dist,(r,c)=heapq.heappop(pq)\n  if (r,c)==e:return path\n  for dr,dc in dirs:\n   nr,nc=r+dr,c+dc\n   if valid(nr,nc):\n    nd=dist+1\n    if nd<d.get((nr,nc),999):\n     d[(nr,nc)]=nd\n     heapq.heappush(pq,(nd,(nr,nc)))"},
+astar2:{p:"<h3>A* 路径规划</h3><p>同A*搜索算法，用于路径规划。</p><pre>import heapq\ndef h(a,b):return abs(a[0]-b[0])+abs(a[1]-b[1])\ndef astar(s,e):\n pq=[(0,s)];g={s:0}\n while pq:\n  f,(r,c)=heapq.heappop(pq)\n  if (r,c)==e:return path\n  for dr,dc in dirs:\n   nr,nc=r+dr,c+dc\n   if valid(nr,nc):\n    ng=g[(r,c)]+1\n    if ng<g.get((nr,nc),999):\n     g[(nr,nc)]=ng\n     heapq.heappush(pq,(ng+h((nr,nc),e),(nr,nc)))"}
 };
 
 function init(){
-let r=cur==="search"?R1:R2,c=cur==="search"?C1:C2;
-maze=[];for(let i=0;i<r;i++){maze[i]=[];for(let j=0;j<c;j++)maze[i][j]=0;}
-st=cur==="search"?{r:2,c:2}:{r:2,c:2};
-en=cur==="search"?{r:9,c:12}:{r:12,c:17};
+var r = cur === "search" ? R1 : R2;
+var c = cur === "search" ? C1 : C2;
+maze = [];
+for(var i=0;i<r;i++){
+  maze[i] = [];
+  for(var j=0;j<c;j++)maze[i][j]=0;
+}
+if(cur === "search"){st = {r:2,c:2}; en = {r:9,c:12};}
+else{st = {r:2,c:2}; en = {r:12,c:17};}
 draw();
 upInfo();
 }
 
 function draw(){
-let r=cur==="search"?R1:R2,c=cur==="search"?C1:C2;
-let g=document.getElementById("grid");
-g.style.gridTemplateColumns="repeat("+c+",25px)";
-g.innerHTML="";
-for(let i=0;i<r;i++){
-for(let j=0;j<c;j++){
-let d=document.createElement("div");
-d.className="cell";d.dataset.r=i;d.dataset.c=j;
-if(i===st.r&&j===st.c)d.classList.add("start");
-else if(i===en.r&&j===en.c)d.classList.add("end");
+var r = cur === "search" ? R1 : R2;
+var c = cur === "search" ? C1 : C2;
+var g = document.getElementById("grid");
+g.style.gridTemplateColumns = "repeat("+c+",25px)";
+g.innerHTML = "";
+for(var i=0;i<r;i++){
+for(var j=0;j<c;j++){
+var d = document.createElement("div");
+d.className = "cell";
+d.setAttribute("data-r", i);
+d.setAttribute("data-c", j);
+if(i===st.r && j===st.c)d.classList.add("start");
+else if(i===en.r && j===en.c)d.classList.add("end");
 else if(maze[i][j]===1)d.classList.add("wall");
-d.onclick=()=>click(i,j);
+d.onclick = (function(i,j){return function(){click(i,j)}})(i,j);
 g.appendChild(d);
 }}}
+
 function click(r,c){
-if(run)return;
+if(isRunning)return;
 if(tool==="wall"){if(!isSE(r,c))maze[r][c]=maze[r][c]?0:1;}
-else if(tool==="start"){if(maze[r][c]!==1)st={r,c};}
-else if(tool==="end"){if(maze[r][c]!==1)en={r,c};}
+else if(tool==="start"){if(maze[r][c]!==1){st.r=r;st.c=c;}}
+else if(tool==="end"){if(maze[r][c]!==1){en.r=r;en.c=c;}}
 else if(tool==="erase")maze[r][c]=0;
 draw();
 }
-function isSE(r,c){return(r===st.r&&c===st.c)||(r===en.r&&c===en.c);}
+function isSE(r,c){return (r===st.r && c===st.c) || (r===en.r && c===en.c);}
 
 function selCase(x){
-cur=x;document.querySelectorAll(".btn-case").forEach(b=>b.classList.remove("active"));
-document.querySelector(".btn-case:nth-child("+(x==="search"?1:2)+")").classList.add("active");
-document.getElementById("searchOpts").style.display=x==="search"?"block":"none";
-document.getElementById("pathOpts").style.display=x==="path"?"block":"none";
-if(x==="search"){algo="bfs";document.querySelectorAll("#searchOpts .btn-algo")[0].classList.add("active");}
-else{algo="dijkstra";document.querySelectorAll("#pathOpts .btn-algo")[0].classList.add("active");}
+cur = x;
+document.getElementById("btnSearch").className = x==="search"?"btn-case active":"btn-case";
+document.getElementById("btnPath").className = x==="path"?"btn-case active":"btn-case";
+document.getElementById("searchOpts").style.display = x==="search"?"block":"none";
+document.getElementById("pathOpts").style.display = x==="path"?"block":"none";
+if(x==="search"){algo="bfs";document.getElementById("btnBfs").className="btn-algo active";}
+else{algo="dijkstra";document.getElementById("btnDijk").className="btn-algo active";}
 init();
 }
-function selAlgo(x){algo=x;
-document.querySelectorAll(".btn-algo").forEach(b=>b.classList.remove("active"));
-event.target.classList.add("active");upInfo();
+function selAlgo(x){
+algo = x;
+document.getElementById("btnBfs").className = x==="bfs"?"btn-algo active":"btn-algo";
+document.getElementById("btnDfs").className = x==="dfs"?"btn-algo active":"btn-algo";
+document.getElementById("btnAstar").className = x==="astar"?"btn-algo active":"btn-algo";
+document.getElementById("btnDijk").className = x==="dijkstra"?"btn-algo active":"btn-algo";
+document.getElementById("btnAstar2").className = x==="astar2"?"btn-algo active":"btn-algo";
+upInfo();
 }
-function setTool(x){tool=x;document.querySelectorAll(".tool-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");}
-function upSpd(){document.getElementById("spdVal").textContent=["很慢","慢","中","快","很快"][Math.floor((document.getElementById("spd").value-1)/20)];}
-function spd(){return Math.max(5,150-document.getElementById("spd").value*1.5);}
-function slp(ms){return new Promise(r=>setTimeout(r,ms));}
+function setTool(x){tool=x;
+var btns=document.querySelectorAll(".tool-btn");
+for(var i=0;i<btns.length;i++)btns[i].className="tool-btn";
+event.target.className="tool-btn active";}
+function upSpd(){var v=document.getElementById("spd").value;document.getElementById("spdVal").innerText=["很慢","慢","中","快","很快"][Math.floor((v-1)/20)];}
+function getSpd(){return Math.max(5,150-document.getElementById("spd").value*1.5);}
+function slp(ms){return new Promise(function(r){setTimeout(r,ms)});}
 
-function upInfo(){document.getElementById("princ").innerHTML=algos[algo].p;document.getElementById("codeTxt").textContent=algos[algo].p.replace(/<[^>]+>/g,"");}
-function showTab(x){document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelectorAll(".content").forEach(c=>c.classList.remove("active"));event.target.classList.add("active");document.getElementById(x).classList.add("active");}
+function upInfo(){document.getElementById("princ").innerHTML=algos[algo].p;document.getElementById("codeTxt").innerText=algos[algo].p.replace(/<[^>]+>/g,"");}
+function showTab(x){var tabs=document.querySelectorAll(".tab");for(var i=0;i<tabs.length;i++)tabs[i].className="tab";event.target.className="tab active";var cs=document.querySelectorAll(".content");for(var i=0;i<cs.length;i++)cs[i].className="content";document.getElementById(x).className="content active";}
 
-function rst(){if(run)return;init();document.getElementById("visCnt").textContent="0";document.getElementById("pathLen").textContent="0";document.getElementById("rslt").className="result";}
+function rst(){if(isRunning)return;init();document.getElementById("visCnt").innerText="0";document.getElementById("pathLen").innerText="0";document.getElementById("rslt").style.display="none";}
 
 async function run(){
-if(run)return;run=true;
-document.getElementById("rslt").className="result";
-let vc=0,path=[];
-if(cur==="search"){clr();if(algo==="bfs")path=await bfs(vc);else if(algo==="dfs")path=await dfs(vc);else path=await astar(vc);}
-else{clr();if(algo==="dijkstra")path=await dijk(vc);else path=await astar2(vc);}
-document.getElementById("visCnt").textContent=vc;
+if(isRunning)return;isRunning=true;
+document.getElementById("rslt").style.display="none";
+var vc = 0, path = [];
+if(cur==="search"){clearVis();if(algo==="bfs")path=await bfs(vc);else if(algo==="dfs")path=await dfs(vc);else path=await astar(vc);}
+else{clearVis();if(algo==="dijkstra")path=await dijk(vc);else path=await astar2(vc);}
+document.getElementById("visCnt").innerText = vc;
 if(path.length>0){
-let cells=document.querySelectorAll(".cell");
-let c=cur==="search"?C1:C2;
-for(let i=0;i<path.length;i++){
-let[r,px]=path[i];
+var cells=document.querySelectorAll(".cell");
+var c=cur==="search"?C1:C2;
+for(var i=0;i<path.length;i++){
+var r=path[i][0],px=path[i][1];
 cells[r*c+px].classList.remove("searching","visited");
 cells[r*c+px].classList.add("path");await slp(30);}
-document.getElementById("pathLen").textContent=path.length-1;
-document.getElementById("rslt").className="result show ok";document.getElementById("rslt").textContent="找到路径！长度:"+(path.length-1);}
-else{document.getElementById("rslt").className="result show no";document.getElementById("rslt").textContent="无法到达！";}
-run=false;
+document.getElementById("pathLen").innerText=path.length-1;
+document.getElementById("rslt").className="result show ok";document.getElementById("rslt").innerText="找到路径！长度:"+(path.length-1);}
+else{document.getElementById("rslt").className="result show no";document.getElementById("rslt").innerText="无法到达！";}
+isRunning=false;
 }
-function clr(){document.querySelectorAll(".cell").forEach(c=>{c.classList.remove("searching","visited","path");let r=parseInt(c.dataset.r),cc=parseInt(c.dataset.c);if(r===st.r&&cc===st.c)c.classList.add("start");else if(r===en.r&&cc===en.c)c.classList.add("end");else if(maze[r][cc]===1)c.classList.add("wall");});}
+function clearVis(){
+var cells=document.querySelectorAll(".cell");
+for(var i=0;i<cells.length;i++){
+cells[i].classList.remove("searching","visited","path");
+var r=parseInt(cells[i].getAttribute("data-r"));
+var c=parseInt(cells[i].getAttribute("data-c"));
+if(r===st.r && c===st.c)cells[i].classList.add("start");
+else if(r===en.r && c===en.c)cells[i].classList.add("end");
+else if(maze[r][c]===1)cells[i].classList.add("wall");
+}}
 
 function dirs(){return[[0,1],[1,0],[0,-1],[-1,0]];}
 function h(r,c){return Math.abs(r-en.r)+Math.abs(c-en.c);}
 
-async function bfs(vc){let q=[[st.r,st.c,[]]];let v=new Set();let par={};let cells=document.querySelectorAll(".cell");let c=C1;
-while(q.length){let[r,px,p]=q.shift();let k=r+","+px;
-if(v.has(k))continue;v.add(k);vc++;document.getElementById("visCnt").textContent=vc;
-if(r===en.r&&px===en.c)return rp(par,r,px);
-let idx=r*c+px;if(!isSE(r,px))cells[idx].classList.add("searching");await slp(spd());if(!isSE(r,px)){cells[idx].classList.remove("searching");cells[idx].classList.add("visited");}
-for(let[dR,dC]of dirs()){let nr=r+dR,nc=px+dC,nk=nr+","+nc;
+async function bfs(vc){
+var q=[[st.r,st.c,[]]];var v=new Set();var par={};var cells=document.querySelectorAll(".cell");var c=C1;
+while(q.length>0){
+var item=q.shift();var r=item[0],px=item[1],p=item[2];var key=r+","+px;
+if(v.has(key))continue;v.add(key);vc++;document.getElementById("visCnt").innerText=vc;
+if(r===en.r && px===en.c)return rebuild(par,r,px);
+var idx=r*c+px;if(!isSE(r,px))cells[idx].classList.add("searching");await slp(getSpd());if(!isSE(r,px)){cells[idx].classList.remove("searching");cells[idx].classList.add("visited");}
+for(var i=0;i<dirs().length;i++){var dr=dirs()[i][0],dc=dirs()[i][1];var nr=r+dr,nc=px+dc,nk=nr+","+nc;
 if(nr>=0&&nr<R1&&nc>=0&&nc<C1&&maze[nr][nc]!==1&&!v.has(nk)){par[nk]=[r,px];q.push([nr,nc,p.concat([[r,px]])]);}}}
 return[];}
 
-async function dfs(vc){let s=[[st.r,st.c,[]]];let v=new Set();let par={};let cells=document.querySelectorAll(".cell");let c=C1;
-while(s.length){let[r,px,p]=s.pop();let k=r+","+px;
-if(v.has(k))continue;v.add(k);vc++;document.getElementById("visCnt").textContent=vc;
-if(r===en.r&&px===en.c)return rp(par,r,px);
-let idx=r*c+px;if(!isSE(r,px))cells[idx].classList.add("searching");await slp(spd());if(!isSE(r,px)){cells[idx].classList.remove("searching");cells[idx].classList.add("visited");}
-for(let i=dirs().length-1;i>=0;i--){let[dR,dC]=dirs()[i];let nr=r+dR,nc=px+dC,nk=nr+","+nc;
+async function dfs(vc){
+var s=[[st.r,st.c,[]]];var v=new Set();var par={};var cells=document.querySelectorAll(".cell");var c=C1;
+while(s.length>0){
+var item=s.pop();var r=item[0],px=item[1],p=item[2];var key=r+","+px;
+if(v.has(key))continue;v.add(key);vc++;document.getElementById("visCnt").innerText=vc;
+if(r===en.r && px===en.c)return rebuild(par,r,px);
+var idx=r*c+px;if(!isSE(r,px))cells[idx].classList.add("searching");await slp(getSpd());if(!isSE(r,px)){cells[idx].classList.remove("searching");cells[idx].classList.add("visited");}
+for(var i=dirs().length-1;i>=0;i--){var dr=dirs()[i][0],dc=dirs()[i][1];var nr=r+dr,nc=px+dc,nk=nr+","+nc;
 if(nr>=0&&nr<R1&&nc>=0&&nc<C1&&maze[nr][nc]!==1&&!v.has(nk)){par[nk]=[r,px];s.push([nr,nc,p.concat([[r,px]])]);}}}
 return[];}
 
-async function astar(vc){let pq=[[h(st.r,st.c),0,st.r,st.c,[]]];let cl=new Set();let g={};let par={};let cells=document.querySelectorAll(".cell");let c=C1;
-while(pq.length){pq.sort((a,b)=>a[0]-b[0]);let[f,gv,r,px,p]=pq.shift();let k=r+","+px;
-if(cl.has(k))continue;cl.add(k);vc++;document.getElementById("visCnt").textContent=vc;
-if(r===en.r&&px===en.c)return rp(par,r,px);
-let idx=r*c+px;if(!isSE(r,px))cells[idx].classList.add("searching");await slp(spd());if(!isSE(r,px)){cells[idx].classList.remove("searching");cells[idx].classList.add("visited");}
-for(let[dR,dC]of dirs()){let nr=r+dR,nc=px+dC,nk=nr+","+nc;
-if(nr>=0&&nr<R1&&nc>=0&&nc<C1&&maze[nr][nc]!==1&&!cl.has(nk)){let ng=gv+1;
-if(ng<(g[nk]||Infinity)){g[nk]=ng;let nf=ng+h(nr,nc);par[nk]=[r,px];pq.push([nf,ng,nr,nc,p.concat([[r,px]])]);}}}}
+async function astar(vc){
+var pq=[[h(st.r,st.c),0,st.r,st.c,[]]];var cl=new Set();var g={};var par={};var cells=document.querySelectorAll(".cell");var c=C1;
+while(pq.length>0){pq.sort(function(a,b){return a[0]-b[0]});var item=pq.shift();var f=item[0],gv=item[1],r=item[2],px=item[3],p=item[4];var key=r+","+px;
+if(cl.has(key))continue;cl.add(key);vc++;document.getElementById("visCnt").innerText=vc;
+if(r===en.r && px===en.c)return rebuild(par,r,px);
+var idx=r*c+px;if(!isSE(r,px))cells[idx].classList.add("searching");await slp(getSpd());if(!isSE(r,px)){cells[idx].classList.remove("searching");cells[idx].classList.add("visited");}
+for(var i=0;i<dirs().length;i++){var dr=dirs()[i][0],dc=dirs()[i][1];var nr=r+dr,nc=px+dc,nk=nr+","+nc;
+if(nr>=0&&nr<R1&&nc>=0&&nc<C1&&maze[nr][nc]!==1&&!cl.has(nk)){var ng=gv+1;
+if(ng<(g[nk]||Infinity)){g[nk]=ng;var nf=ng+h(nr,nc);par[nk]=[r,px];pq.push([nf,ng,nr,nc,p.concat([[r,px]])]);}}}}
 return[];}
 
-async function dijk(vc){let pq=[[0,st.r,st.c,[]]];let v=new Set();let d={};let par={};let cells=document.querySelectorAll(".cell");let c=C2;
-while(pq.length){pq.sort((a,b)=>a[0]-b[0]);let[dist,r,px,p]=pq.shift();let k=r+","+px;
-if(v.has(k))continue;v.add(k);vc++;document.getElementById("visCnt").textContent=vc;
-if(r===en.r&&px===en.c)return rp(par,r,px);
-let idx=r*c+px;if(!isSE(r,px))cells[idx].classList.add("searching");await slp(spd());if(!isSE(r,px)){cells[idx].classList.remove("searching");cells[idx].classList.add("visited");}
-for(let[dR,dC]of dirs()){let nr=r+dR,nc=px+dC,nk=nr+","+nc;
-if(nr>=0&&nr<R2&&nc>=0&&nc<C2&&maze[nr][nc]!==1&&!v.has(nk)){let nd=dist+1;
+async function dijk(vc){
+var pq=[[0,st.r,st.c,[]]];var v=new Set();var d={};var par={};var cells=document.querySelectorAll(".cell");var c=C2;
+while(pq.length>0){pq.sort(function(a,b){return a[0]-b[0]});var item=pq.shift();var dist=item[0],r=item[1],px=item[2],p=item[3];var key=r+","+px;
+if(v.has(key))continue;v.add(key);vc++;document.getElementById("visCnt").innerText=vc;
+if(r===en.r && px===en.c)return rebuild(par,r,px);
+var idx=r*c+px;if(!isSE(r,px))cells[idx].classList.add("searching");await slp(getSpd());if(!isSE(r,px)){cells[idx].classList.remove("searching");cells[idx].classList.add("visited");}
+for(var i=0;i<dirs().length;i++){var dr=dirs()[i][0],dc=dirs()[i][1];var nr=r+dr,nc=px+dc,nk=nr+","+nc;
+if(nr>=0&&nr<R2&&nc>=0&&nc<C2&&maze[nr][nc]!==1&&!v.has(nk)){var nd=dist+1;
 if(nd<(d[nk]||Infinity)){d[nk]=nd;par[nk]=[r,px];pq.push([nd,nr,nc,p.concat([[r,px]])]);}}}
 return[];}
 
-async function astar2(vc){let pq=[[h(st.r,st.c),0,st.r,st.c,[]]];let cl=new Set();let g={};let par={};let cells=document.querySelectorAll(".cell");let c=C2;
-while(pq.length){pq.sort((a,b)=>a[0]-b[0]);let[f,gv,r,px,p]=pq.shift();let k=r+","+px;
-if(cl.has(k))continue;cl.add(k);vc++;document.getElementById("visCnt").textContent=vc;
-if(r===en.r&&px===en.c)return rp(par,r,px);
-let idx=r*c+px;if(!isSE(r,px))cells[idx].classList.add("searching");await slp(spd());if(!isSE(r,px)){cells[idx].classList.remove("searching");cells[idx].classList.add("visited");}
-for(let[dR,dC]of dirs()){let nr=r+dR,nc=px+dC,nk=nr+","+nc;
-if(nr>=0&&nr<R2&&nc>=0&&nc<C2&&maze[nr][nc]!==1&&!cl.has(nk)){let ng=gv+1;
-if(ng<(g[nk]||Infinity)){g[nk]=ng;let nf=ng+h(nr,nc);par[nk]=[r,px];pq.push([nf,ng,nr,nc,p.concat([[r,px]])]);}}}}
+async function astar2(vc){
+var pq=[[h(st.r,st.c),0,st.r,st.c,[]]];var cl=new Set();var g={};var par={};var cells=document.querySelectorAll(".cell");var c=C2;
+while(pq.length>0){pq.sort(function(a,b){return a[0]-b[0]});var item=pq.shift();var f=item[0],gv=item[1],r=item[2],px=item[3],p=item[4];var key=r+","+px;
+if(cl.has(key))continue;cl.add(key);vc++;document.getElementById("visCnt").innerText=vc;
+if(r===en.r && px===en.c)return rebuild(par,r,px);
+var idx=r*c+px;if(!isSE(r,px))cells[idx].classList.add("searching");await slp(getSpd());if(!isSE(r,px)){cells[idx].classList.remove("searching");cells[idx].classList.add("visited");}
+for(var i=0;i<dirs().length;i++){var dr=dirs()[i][0],dc=dirs()[i][1];var nr=r+dr,nc=px+dc,nk=nr+","+nc;
+if(nr>=0&&nr<R2&&nc>=0&&nc<C2&&maze[nr][nc]!==1&&!cl.has(nk)){var ng=gv+1;
+if(ng<(g[nk]||Infinity)){g[nk]=ng;var nf=ng+h(nr,nc);par[nk]=[r,px];pq.push([nf,ng,nr,nc,p.concat([[r,px]])]);}}}
 return[];}
 
-function rp(par,er,ec){let path=[],k=er+","+ec;while(k){let[r,c]=k.split(",").map(Number);path.unshift([r,c]);k=par[k]?par[k][0]+","+par[k][1]:null;}return path;}
+function rebuild(par,er,ec){var path=[];var key=er+","+ec;while(key){var arr=key.split(",");var r=parseInt(arr[0]),c=parseInt(arr[1]);path.unshift([r,c]);key=par[key]?par[key][0]+","+par[key][1]:null;}return path;}
 
 init();
 </script>
