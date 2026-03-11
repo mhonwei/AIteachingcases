@@ -10,7 +10,7 @@
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -23,67 +23,139 @@
             font-weight: 900;
             color: #ffffff;
             text-shadow: 
-                0 0 20px rgba(255,255,255,0.8),
-                0 0 40px rgba(255,255,255,0.6);
-            animation: float 4s ease-in-out infinite;
+                0 0 20px rgba(255,215,0,0.8),
+                0 0 40px rgba(255,215,0,0.6);
+            animation: float 3s ease-in-out infinite;
             white-space: nowrap;
-            z-index: 2;
+            z-index: 10;
             letter-spacing: 8px;
+            text-align: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
         }
         @keyframes float {
             0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-30px) rotate(2deg); }
+            50% { transform: translateY(-25px) rotate(1deg); }
         }
-        .particles {
+        .firework {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            pointer-events: none;
             z-index: 1;
         }
-        .particle {
+        .flower {
             position: absolute;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.5);
-            animation: particle-float 15s infinite linear;
-        }
-        @keyframes particle-float {
-            to { transform: translateY(-100vh) rotate(360deg); }
+            font-size: 24px;
+            z-index: 2;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <div class="particles" id="particles"></div>
     <div class="floating-text">云妹生日快乐！</div>
 
     <script>
-        // 动态生成粒子背景
-        const particlesContainer = document.getElementById('particles');
-        const particleCount = 50;
-        
-        for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            particle.classList.add('particle');
+        // 烟花效果
+        function createFirework() {
+            const firework = document.createElement('div');
+            firework.classList.add('firework');
             
-            // 随机大小 (2-8px)
-            const size = Math.random() * 6 + 2;
-            particle.style.width = `${size}px`;
-            particle.style.height = `${size}px`;
+            // 随机位置 (从底部发射)
+            const startX = Math.random() * window.innerWidth;
+            const startY = window.innerHeight;
+            firework.style.left = `${startX}px`;
+            firework.style.top = `${startY}px`;
             
-            // 随机位置
-            particle.style.left = `${Math.random() * 100}%`;
-            particle.style.top = `${Math.random() * 100 + 100}%`;
+            // 随机颜色
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            firework.style.backgroundColor = color;
             
-            // 随机动画时长 (10-20s)
-            const duration = Math.random() * 10 + 10;
-            particle.style.animationDuration = `${duration}s`;
+            document.body.appendChild(firework);
             
-            // 随机延迟
-            particle.style.animationDelay = `${Math.random() * 5}s`;
+            // 动画参数
+            const duration = 2000 + Math.random() * 1000; // 2-3秒
+            const endX = startX + (Math.random() - 0.5) * 300;
+            const endY = Math.random() * window.innerHeight * 0.5;
             
-            particlesContainer.appendChild(particle);
+            // 执行动画
+            const startTime = Date.now();
+            const animate = () => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // 缓动函数 (easeOutCubic)
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                
+                const currentX = startX + (endX - startX) * easeProgress;
+                const currentY = startY + (endY - startY) * easeProgress;
+                
+                firework.style.left = `${currentX}px`;
+                firework.style.top = `${currentY}px`;
+                firework.style.opacity = 1 - progress;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    firework.remove();
+                }
+            };
+            
+            requestAnimationFrame(animate);
+            
+            // 定时创建新烟花
+            setTimeout(createFirework, 300 + Math.random() * 500);
         }
+        
+        // 鲜花飘落效果
+        function createFlower() {
+            const flower = document.createElement('div');
+            flower.classList.add('flower');
+            flower.innerHTML = '🌸'; // 使用emoji作为鲜花
+            
+            // 随机位置 (从顶部飘落)
+            const startX = Math.random() * window.innerWidth;
+            flower.style.left = `${startX}px`;
+            flower.style.top = '-50px';
+            
+            document.body.appendChild(flower);
+            
+            // 动画参数
+            const duration = 5000 + Math.random() * 3000; // 5-8秒
+            const endX = startX + (Math.random() - 0.5) * 200;
+            
+            // 执行动画
+            const startTime = Date.now();
+            const animate = () => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const currentY = -50 + (window.innerHeight + 100) * progress;
+                const currentX = startX + (endX - startX) * progress;
+                
+                flower.style.top = `${currentY}px`;
+                flower.style.left = `${currentX}px`;
+                flower.style.opacity = 1 - Math.pow(progress - 1, 2); // 淡出效果
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    flower.remove();
+                }
+            };
+            
+            requestAnimationFrame(animate);
+            
+            // 定时创建新鲜花
+            setTimeout(createFlower, 800 + Math.random() * 1000);
+        }
+        
+        // 启动特效
+        setTimeout(createFirework, 100);
+        setTimeout(createFlower, 200);
     </script>
 </body>
 </html>
