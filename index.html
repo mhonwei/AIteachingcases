@@ -1,164 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<title>AI算法教学</title>
-<style>
-body{font-family:Microsoft YaHei;background:#1a1a2e;color:#fff;padding:20px;text-align:center}
-h1{color:#00d4ff}
-.container{display:flex;justify-content:center;gap:20px;flex-wrap:wrap}
-.box{background:#1e1e2e;padding:20px;border-radius:10px}
-#grid{display:grid;gap:1px;background:#333;margin:20px auto}
-.cell{width:25px;height:25px;background:#222}
-.cell.wall{background:#555}
-.cell.start{background:#4CAF50}
-.cell.end{background:#f44336}
-.cell.vis{background:#9c27b0}
-.cell.path{background:#00d4ff}
-.btn{padding:10px 20px;margin:5px;cursor:pointer;background:#4CAF50;border:none;border-radius:5px;color:#fff}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云妹生日快乐！</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background: linear-gradient(135deg, #ffafbd, #ffc3a0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        .floating-text {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(0,0,0,0.3);
+            animation: float 6s ease-in-out infinite;
+            white-space: nowrap;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+    </style>
 </head>
 <body>
-<h1>AI算法可视化</h1>
-<div class="container">
-<div class="box">
-<h3>选择案例</h3>
-<button class="btn" onclick="setCase('search')">搜索算法</button>
-<button class="btn" onclick="setCase('path')">路径规划</button>
-<h3>选择算法</h3>
-<div id="algoList">
-<button class="btn" id="btnBfs" onclick="setAlgo('bfs')">BFS</button>
-<button class="btn" id="btnDfs" onclick="setAlgo('dfs')">DFS</button>
-<button class="btn" id="btnAstar" onclick="setAlgo('astar')">A*</button>
-</div>
-<button class="btn" onclick="runAlgo()">运行</button>
-<button class="btn" onclick="resetGrid()">重置</button>
-<p>访问:<span id="vis">0</span> 路径:<span id="len">0</span></p>
-</div>
-<div class="box">
-<div id="grid"></div>
-</div>
-</div>
-<script>
-var R = 12, C = 15, cur = 'search', algo = 'bfs', maze = [], st = {r:2,c:2}, en = {r:9,c:12}, vis = 0;
-
-function init() {
-    maze = [];
-    for(var i=0; i<R; i++) {
-        maze[i] = [];
-        for(var j=0; j<C; j++) maze[i][j] = 0;
-    }
-    draw();
-}
-
-function draw() {
-    var g = document.getElementById('grid');
-    g.style.gridTemplateColumns = 'repeat('+C+',25px)';
-    g.innerHTML = '';
-    for(var i=0; i<R; i++) {
-        for(var j=0; j<C; j++) {
-            var d = document.createElement('div');
-            d.className = 'cell';
-            if(i==st.r && j==st.c) d.classList.add('start');
-            else if(i==en.r && j==en.c) d.classList.add('end');
-            else if(maze[i][j]==1) d.classList.add('wall');
-            var fi = i, fj = j;
-            d.onclick = function() {
-                if(maze[fi][fj]==0) maze[fi][fj]=1;
-                else maze[fi][fj]=0;
-                draw();
-            };
-            g.appendChild(d);
-        }
-    }
-}
-
-function setCase(c) {
-    cur = c;
-    var list = document.getElementById('algoList');
-    if(c == 'path') {
-        R = 15; C = 20;
-        st = {r:2,c:2}; en = {r:12,c:17};
-        list.innerHTML = '<button class="btn" id="btnDijk" onclick="setAlgo(dijk)">Dijkstra</button><button class="btn" id="btnAstar2" onclick="setAlgo(astar)">A*</button>';
-        algo = 'dijk';
-    } else {
-        R = 12; C = 15;
-        st = {r:2,c:2}; en = {r:9,c:12};
-        list.innerHTML = '<button class="btn" id="btnBfs" onclick="setAlgo(bfs)">BFS</button><button class="btn" id="btnDfs" onclick="setAlgo(dfs)">DFS</button><button class="btn" id="btnAstar" onclick="setAlgo(astar)">A*</button>';
-        algo = 'bfs';
-    }
-    init();
-}
-
-function setAlgo(a) { algo = a; }
-
-function resetGrid() {
-    vis = 0;
-    document.getElementById('vis').innerText = '0';
-    document.getElementById('len').innerText = '0';
-    init();
-}
-
-async function runAlgo() {
-    vis = 0;
-    var q = [[st.r, st.c]];
-    var v = {};
-    var par = {};
-    var cells = document.getElementsByClassName('cell');
-    
-    while(q.length > 0) {
-        var item = q.shift();
-        var r = item[0];
-        var c0 = item[1];
-        var k = r + ',' + c0;
-        if(v[k]) continue;
-        v[k] = true;
-        vis++;
-        document.getElementById('vis').innerText = vis;
-        
-        if(r == en.r && c0 == en.c) {
-            showPath(par);
-            return;
-        }
-        
-        var idx = r * C + c0;
-        cells[idx].classList.add('vis');
-        await new Promise(function(t){setTimeout(t,20);});
-        
-        var dirs = [[0,1],[1,0],[0,-1],[-1,0]];
-        for(var di=0; di<dirs.length; di++) {
-            var dr = dirs[di][0];
-            var dc = dirs[di][1];
-            var nr = r + dr;
-            var nc = c0 + dc;
-            var nk = nr + ',' + nc;
-            if(nr>=0 && nr<R && nc>=0 && nc<C && maze[nr][nc]!=1 && !v[nk]) {
-                q.push([nr,nc]);
-                par[nk] = k;
-            }
-        }
-    }
-    alert('找不到路径');
-}
-
-function showPath(par) {
-    var path = [];
-    var k = en.r + ',' + en.c;
-    while(k) {
-        var p = k.split(',');
-        path.unshift([parseInt(p[0]), parseInt(p[1])]);
-        k = par[k];
-    }
-    document.getElementById('len').innerText = path.length - 1;
-    var cells = document.getElementsByClassName('cell');
-    for(var i=0; i<path.length; i++) {
-        var idx = path[i][0] * C + path[i][1];
-        cells[idx].classList.remove('vis');
-        cells[idx].classList.add('path');
-    }
-}
-
-init();
-</script>
+    <div class="floating-text">云妹生日快乐！</div>
 </body>
 </html>
